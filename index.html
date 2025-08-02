@@ -1,203 +1,455 @@
-<style>
-    /* Oyunun sayfa üzerindeki görünümünü ayarlar */
-    #game-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        margin-top: 50px;
-        background-color: #1a1a1a;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    }
-    #game-container h2 {
-        color: #ff6f00;
-        font-family: 'Segoe UI', sans-serif;
-        margin-bottom: 20px;
-    }
-    #gameCanvas {
-        border: 2px solid #5a5a5a;
-        background-color: #3f3f3f;
-        cursor: crosshair;
-    }
-    #game-info {
-        display: flex;
-        justify-content: space-between;
-        width: 800px; /* Canvas genişliği ile aynı */
-        margin-top: 10px;
-        color: white;
-        font-family: monospace;
-        font-size: 16px;
-    }
-</style>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>CS2 - Counter-Strike 2 Resmi Sayfası</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6f00;
+            --secondary-color: #333;
+            --dark-bg: #1a1a1a;
+            --light-text: #f0f0f0;
+        }
 
-<div id="game-container">
-    <h2>CS2 Mini-Oyun (Prototip)</h2>
-    <div id="game-info">
-        <div>Puan: <span id="score">0</span></div>
-        <div>FPS: <span id="fps">0</span></div>
-    </div>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-</div>
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
 
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
+        }
 
-    let score = 0;
-    const player = {
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        size: 20,
-        color: '#ffffff',
-        speed: 5
-    };
+        .navbar-nav .nav-link {
+            color: var(--light-text) !important;
+            transition: color 0.3s;
+        }
 
-    const bullets = [];
-    const enemies = [];
-    const bulletSpeed = 10;
-    const enemySpeed = 1;
-    let lastSpawnTime = 0;
-    const spawnInterval = 1000;
-    let lastFrameTime = 0;
+        .navbar-nav .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
 
-    const keys = {};
-    let mouseX = player.x;
-    let mouseY = player.y;
+        .header-bg {
+            background: url('https://assetsio.gnwcdn.com/counter-strike-2-cs2.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp') no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
 
-    document.addEventListener('keydown', (e) => {
-        keys[e.key] = true;
-    });
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
 
-    document.addEventListener('keyup', (e) => {
-        keys[e.key] = false;
-    });
+        .header-content {
+            position: relative;
+            z-index: 10;
+        }
 
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mouseX = e.clientX - rect.left;
-        mouseY = e.clientY - rect.top;
-    });
+        .header-content h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
 
-    canvas.addEventListener('click', () => {
-        const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-        const bullet = {
-            x: player.x,
-            y: player.y,
-            size: 5,
-            color: '#ffdd00',
-            dx: Math.cos(angle) * bulletSpeed,
-            dy: Math.sin(angle) * bulletSpeed
-        };
-        bullets.push(bullet);
-    });
+        .header-content p {
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
 
-    function gameLoop(currentTime) {
-        const deltaTime = currentTime - lastFrameTime;
-        const fps = Math.round(1000 / deltaTime);
-        document.getElementById('fps').textContent = fps;
-        lastFrameTime = currentTime;
+        .btn-primary-cs {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--dark-bg);
+            font-weight: bold;
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s, transform 0.3s;
+        }
 
-        update(currentTime);
-        draw();
-        requestAnimationFrame(gameLoop);
-    }
+        .btn-primary-cs:hover {
+            background-color: #e66000;
+            border-color: #e66000;
+            transform: scale(1.05);
+        }
 
-    function update(currentTime) {
-        if (keys['w'] || keys['W']) player.y -= player.speed;
-        if (keys['s'] || keys['S']) player.y += player.speed;
-        if (keys['a'] || keys['A']) player.x -= player.speed;
-        if (keys['d'] || keys['D']) player.x += player.speed;
+        .section {
+            padding: 80px 0;
+        }
 
-        player.x = Math.max(player.size / 2, Math.min(canvas.width - player.size / 2, player.x));
-        player.y = Math.max(player.size / 2, Math.min(canvas.height - player.size / 2, player.y));
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
 
-        for (let i = bullets.length - 1; i >= 0; i--) {
-            const bullet = bullets[i];
-            bullet.x += bullet.dx;
-            bullet.y += bullet.dy;
-            if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
-                bullets.splice(i, 1);
+        .feature-item {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: #222;
+            border: none;
+        }
+
+        .card-img-top {
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* 3D Oyun Bölümü Stilleri */
+        #game-section {
+            padding: 80px 0;
+            background-color: #1a1a1a;
+            text-align: center;
+        }
+        #game-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+        #game-canvas-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            position: relative;
+        }
+        #game-info-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-shadow: 2px 2px 4px black;
+            pointer-events: none;
+            z-index: 100;
+        }
+        #game-info-overlay h3 { font-size: 2rem; }
+        #game-info-overlay p { font-size: 1.2rem; }
+        
+        #joystick {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #joystick-handle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.6);
+            position: relative;
+            transform: translate(0, 0);
+        }
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        footer {
+            background-color: #111;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">CS2</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#ozellikler">Özellikler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#galeri">Galeri</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#oyun-demosu">Oyun Demosu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://store.steampowered.com/app/730/CounterStrike_2/" target="_blank">Şimdi Oyna</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="header-bg">
+        <div class="header-content text-white">
+            <h1 class="animate__animated animate__fadeInDown">COUNTER-STRIKE 2</h1>
+            <p class="lead mt-3 animate__animated animate__fadeInUp">Efsane geri döndü. Sınırsız aksiyona hazır ol!</p>
+            <a href="https://store.steampowered.com/app/730/CounterStrike_2/" target="_blank" class="btn btn-primary-cs btn-lg mt-4 animate__animated animate__zoomIn">Şimdi Ücretsiz Oyna</a>
+        </div>
+    </header>
+
+    <section id="ozellikler" class="section">
+        <div class="container text-center">
+            <h2 class="text-center">YENİ ÖZELLİKLER</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">⚔</div> <h3>Yenilenen Haritalar</h3>
+                        <p>Favori haritalarınız, Source 2 motoru ile baştan aşağı yenilendi.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">🔥</div> <h3>Dinamik Sis Bombaları</h3>
+                        <p>Sis bombaları artık çevre ile etkileşime giriyor ve mermi geçişlerine göre dağılıyor.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">📦</div> <h3>Geliştirilmiş Eşyalar</h3>
+                        <p>Yeni silah modelleri, animasyonlar ve efektlerle daha gerçekçi bir deneyim.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeri" class="section bg-dark">
+        <div class="container text-center">
+            <h2 class="text-center">GALERİ</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="https://assetsio.gnwcdn.com/Counter-Strike-2-dust-2-map-a-site.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp" class="card-img-top" alt="Oyun İçi Görüntü 1">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="https://assetsio.gnwcdn.com/Counter-Strike-2-anubis-map-mid.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp" class="card-img-top" alt="Oyun İçi Görüntü 2">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="https://assetsio.gnwcdn.com/Counter-Strike-2-mirage-map-mid.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp" class="card-img-top" alt="Oyun İçi Görüntü 3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="oyun-demosu" class="section">
+        <div class="container">
+            <h2 class="text-center">3D Oyun Demosu</h2>
+            <p class="text-center">Fare ile nişan alın ve tıklayarak ateş edin. Hareket etmek için W-A-S-D tuşlarını kullanın. Mobilde ise joystick ve ekrana dokunarak oynayın.</p>
+            <div id="game-canvas-container">
+                <div id="game-info-overlay">
+                    <h3>Oynamak için Tıklayın</h3>
+                    <p>Fare ile nişan al, W-A-S-D ile hareket et.</p>
+                    <p>Mobilde joystick kullan.</p>
+                </div>
+                
+                <div id="joystick">
+                    <div id="joystick-handle"></div>
+                </div>
+                <div id="crosshair"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2024 CS2. Tüm hakları saklıdır.</p>
+            <p><a href="#" class="text-white">Gizlilik Politikası</a> | <a href="#" class="text-white">Steam Sayfası</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+
+    <script>
+        const gameCanvasContainer = document.getElementById('game-canvas-container');
+        const gameInfoOverlay = document.getElementById('game-info-overlay');
+        
+        let isGameRunning = false;
+
+        gameInfoOverlay.addEventListener('click', () => {
+            if (!isGameRunning) {
+                startGame();
+                gameInfoOverlay.style.display = 'none';
             }
-        }
-
-        if (currentTime - lastSpawnTime > spawnInterval) {
-            spawnEnemy();
-            lastSpawnTime = currentTime;
-        }
-
-        for (const enemy of enemies) {
-            const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
-            enemy.x += Math.cos(angle) * enemySpeed;
-            enemy.y += Math.sin(angle) * enemySpeed;
-        }
-
-        for (let i = bullets.length - 1; i >= 0; i--) {
-            const bullet = bullets[i];
-            for (let j = enemies.length - 1; j >= 0; j--) {
-                const enemy = enemies[j];
-                const dist = Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y);
-                if (dist < bullet.size + enemy.size) {
-                    bullets.splice(i, 1);
-                    enemies.splice(j, 1);
-                    score += 10;
-                    document.getElementById('score').textContent = score;
-                    break;
-                }
-            }
-        }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Oyuncuyu çiz
-        const angleToMouse = Math.atan2(mouseY - player.y, mouseX - player.x);
-        ctx.save();
-        ctx.translate(player.x, player.y);
-        ctx.rotate(angleToMouse);
-        ctx.fillStyle = player.color;
-        ctx.fillRect(-player.size / 2, -player.size / 2, player.size, player.size); // Kare oyuncu
-        ctx.restore();
-
-        for (const bullet of bullets) {
-            ctx.beginPath();
-            ctx.arc(bullet.x, bullet.y, bullet.size, 0, Math.PI * 2);
-            ctx.fillStyle = bullet.color;
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        for (const enemy of enemies) {
-            ctx.beginPath();
-            ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
-            ctx.fillStyle = '#ff6f00'; // CS2 logosunun turuncu rengi
-            ctx.fill();
-            ctx.closePath();
-        }
-    }
-
-    function spawnEnemy() {
-        const size = 15;
-        let x, y;
-        if (Math.random() > 0.5) {
-            x = Math.random() > 0.5 ? -size : canvas.width + size;
-            y = Math.random() * canvas.height;
-        } else {
-            x = Math.random() * canvas.width;
-            y = Math.random() > 0.5 ? -size : canvas.height + size;
-        }
-
-        enemies.push({
-            x: x,
-            y: y,
-            size: size,
-            color: 'red',
-            speed: enemySpeed
         });
-    }
 
-    requestAnimationFrame(gameLoop);
-</script>
+        function startGame() {
+            isGameRunning = true;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, gameCanvasContainer.clientWidth / gameCanvasContainer.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(gameCanvasContainer.clientWidth, gameCanvasContainer.clientHeight);
+            gameCanvasContainer.appendChild(renderer.domElement);
+
+            const planeGeometry = new THREE.PlaneGeometry(100, 100);
+            const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x5a5a5a, side: THREE.DoubleSide });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = Math.PI / 2;
+            scene.add(plane);
+
+            const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
+            const playerMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const player = new THREE.Mesh(playerGeometry, playerMaterial);
+            player.position.y = 1;
+            scene.add(player);
+
+            camera.position.z = 5;
+            camera.position.y = 10;
+            camera.lookAt(player.position);
+
+            const moveSpeed = 0.05;
+            const keys = {};
+            let isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            
+            const joystick = document.getElementById('joystick');
+            const joystickHandle = document.getElementById('joystick-handle');
+            let isJoystickActive = false;
+            let joystickVector = new THREE.Vector2();
+
+            if (isMobile) {
+                joystick.style.display = 'flex';
+            } else {
+                joystick.style.display = 'none';
+            }
+            
+            joystick.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isJoystickActive = true;
+            }, { passive: false });
+            
+            joystick.addEventListener('touchmove', (e) => {
+                if (!isJoystickActive) return;
+                const touch = e.touches[0];
+                const rect = joystick.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                let dx = touch.clientX - centerX;
+                let dy = touch.clientY - centerY;
+                const distance = Math.hypot(dx, dy);
+                const maxDistance = rect.width / 2;
+                if (distance > maxDistance) {
+                    const angle = Math.atan2(dy, dx);
+                    dx = Math.cos(angle) * maxDistance;
+                    dy = Math.sin(angle) * maxDistance;
+                }
+                joystickHandle.style.transform = `translate(${dx}px, ${dy}px)`;
+                joystickVector.set(dx / maxDistance, -dy / maxDistance).normalize();
+            }, { passive: false });
+
+            joystick.addEventListener('touchend', () => {
+                isJoystickActive = false;
+                joystickHandle.style.transform = 'translate(0, 0)';
+                joystickVector.set(0, 0);
+            });
+
+            document.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
+            document.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+            document.addEventListener('click', (e) => {
+                if (isGameRunning) shoot();
+            });
+            
+            document.addEventListener('touchstart', (e) => {
+                if (isGameRunning && !joystick.contains(e.target)) {
+                     shoot();
+                }
+            });
+
+            function shoot() {
+                const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+                bullet.position.copy(player.position);
+                scene.add(bullet);
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction); 
+                bullet.velocity = direction.multiplyScalar(0.5);
+                setTimeout(() => {
+                    scene.remove(bullet);
+                }, 2000);
+            }
+
+            function animate() {
+                if (!isGameRunning) return;
+                requestAnimationFrame(animate);
+
+                if (isMobile && isJoystickActive) {
+                    player.position.x += joystickVector.x * moveSpeed * 2;
+                    player.position.z += joystickVector.y * moveSpeed * 2;
+                } else {
+                    if (keys['w']) player.position.z -= moveSpeed;
+                    if (keys['s']) player.position.z += moveSpeed;
+                    if (keys['a']) player.position.x -= moveSpeed;
+                    if (keys['d']) player.position.x += moveSpeed;
+                }
+                
+                scene.children.forEach(child => {
+                    if (child.velocity) {
+                        child.position.add(child.velocity);
+                    }
+                });
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+    </script>
+</body>
+</html>
