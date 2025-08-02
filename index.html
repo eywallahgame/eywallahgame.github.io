@@ -95,8 +95,10 @@
         let direction = new THREE.Vector3();
         let canJump = false;
         let enemies = [];
+        let teammates = [];
         let playerBullets = [];
         let enemyBullets = [];
+        let teammateBullets = [];
 
         const playerHeight = 1.8;
         const playerSpeed = 0.05;
@@ -107,6 +109,7 @@
         const reloadTime = 2000;
         let isReloading = false;
         const maxEnemies = 10;
+        const maxTeammates = 1;
         const mapSize = 100;
         const spawnPoints = [
             new THREE.Vector3(30, 0.9, 30),
@@ -156,8 +159,8 @@
             currentAmmoElement.innerText = currentAmmo;
             maxAmmoElement.innerText = maxAmmo;
 
-            createWalls();
-            spawnInitialEnemies();
+            createCS2Map();
+            spawnInitialBots();
 
             document.addEventListener('keydown', onKeyDown, false);
             document.addEventListener('keyup', onKeyUp, false);
@@ -227,30 +230,54 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-
-        function createWalls() {
+        
+        function createCS2Map() {
             const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xcccccc });
-            const wallHeight = 5;
-            const wallDepth = 1;
+            const boxMaterial = new THREE.MeshLambertMaterial({ color: 0x95a5a6 });
+
             const walls = [
-                new THREE.Mesh(new THREE.BoxGeometry(mapSize, wallHeight, wallDepth), wallMaterial),
-                new THREE.Mesh(new THREE.BoxGeometry(mapSize, wallHeight, wallDepth), wallMaterial),
-                new THREE.Mesh(new THREE.BoxGeometry(wallDepth, wallHeight, mapSize), wallMaterial),
-                new THREE.Mesh(new THREE.BoxGeometry(wallDepth, wallHeight, mapSize), wallMaterial)
+                // Dış duvarlar
+                new THREE.Mesh(new THREE.BoxGeometry(mapSize, 5, 1), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(mapSize, 5, 1), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(1, 5, mapSize), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(1, 5, mapSize), wallMaterial)
             ];
-            walls[0].position.set(0, wallHeight/2, -mapSize/2);
-            walls[1].position.set(0, wallHeight/2, mapSize/2);
-            walls[2].position.set(-mapSize/2, wallHeight/2, 0);
-            walls[3].position.set(mapSize/2, wallHeight/2, 0);
+            walls[0].position.set(0, 2.5, -mapSize/2);
+            walls[1].position.set(0, 2.5, mapSize/2);
+            walls[2].position.set(-mapSize/2, 2.5, 0);
+            walls[3].position.set(mapSize/2, 2.5, 0);
 
             walls.forEach(wall => scene.add(wall));
+
+            // İç yapılar, siperler
+            const boxes = [
+                new THREE.Mesh(new THREE.BoxGeometry(5, 2, 5), boxMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(10, 3, 2), boxMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(3, 3, 10), boxMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(20, 5, 5), boxMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(5, 5, 20), boxMaterial)
+            ];
+            boxes[0].position.set(20, 1, -15);
+            boxes[1].position.set(-10, 1.5, 25);
+            boxes[2].position.set(-25, 1.5, -10);
+            boxes[3].position.set(10, 2.5, 10);
+            boxes[4].position.set(-15, 2.5, -15);
+
+            boxes.forEach(box => scene.add(box));
         }
         
-        function createEnemyBot() {
+        function createBot(type = 'enemy') {
             const bodyGeometry = new THREE.BoxGeometry(1, 1.8, 1);
-            const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x3498db });
             const headGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-            const headMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+            
+            let bodyMaterial, headMaterial;
+            if (type === 'enemy') {
+                bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x3498db }); // Mavi
+                headMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c }); // Kırmızı
+            } else {
+                bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x2ecc71 }); // Yeşil
+                headMaterial = new THREE.MeshLambertMaterial({ color: 0xf1c40f }); // Sarı
+            }
 
             const bot = new THREE.Group();
             const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
@@ -260,6 +287,7 @@
             bot.add(head);
 
             bot.health = 100;
+            bot.type = type;
             bot.lastFireTime = Date.now();
             bot.fireRate = Math.random() * 2000 + 1000;
             bot.movementSpeed = Math.random() * 0.03 + 0.01;
@@ -269,18 +297,25 @@
             return bot;
         }
 
-        function spawnInitialEnemies() {
+        function spawnInitialBots() {
             for (let i = 0; i < maxEnemies; i++) {
-                spawnNewEnemy();
+                spawnBot('enemy');
+            }
+            for (let i = 0; i < maxTeammates; i++) {
+                spawnBot('teammate');
             }
         }
         
-        function spawnNewEnemy() {
-            const enemy = createEnemyBot();
+        function spawnBot(type = 'enemy') {
+            const bot = createBot(type);
             const spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
-            enemy.position.copy(spawnPoint);
-            scene.add(enemy);
-            enemies.push(enemy);
+            bot.position.copy(spawnPoint);
+            scene.add(bot);
+            if (type === 'enemy') {
+                enemies.push(bot);
+            } else {
+                teammates.push(bot);
+            }
         }
         
         function onKeyDown(event) {
@@ -340,6 +375,7 @@
             const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
             const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
             const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+            bullet.type = 'player';
 
             bullet.position.copy(camera.position);
             const direction = new THREE.Vector3();
@@ -464,7 +500,6 @@
                 direction.z = moveJoystickPos.y;
                 direction.x = moveJoystickPos.x;
             } else {
-                // Klavyeden kamera kontrolü
                 if (turnLeft) {
                     camera.rotation.y += turnSpeed;
                 }
@@ -503,20 +538,43 @@
             }
             
             if (enemies.length < maxEnemies) {
-                spawnNewEnemy();
+                spawnBot('enemy');
+            }
+            if (teammates.length < maxTeammates) {
+                spawnBot('teammate');
             }
             
             updateEnemyBots();
+            updateTeammates();
             updateBullets();
             
             renderer.render(scene, camera);
         }
 
+        function findNearestTarget(bot, targetList) {
+            let nearestTarget = null;
+            let minDistance = Infinity;
+
+            targetList.forEach(target => {
+                const distance = bot.position.distanceTo(target.position);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestTarget = target;
+                }
+            });
+
+            return nearestTarget;
+        }
+
         function updateEnemyBots() {
             enemies.forEach(enemy => {
-                const lookDirection = new THREE.Vector3().subVectors(camera.position, enemy.position);
-                enemy.lookAt(new THREE.Vector3(camera.position.x, enemy.position.y, camera.position.z));
+                const target = findNearestTarget(enemy, teammates.concat([{ position: camera.position, type: 'player' }]));
+                if (!target) return;
+
+                // Oyuncuya veya takım arkadaşına dönme
+                enemy.lookAt(new THREE.Vector3(target.position.x, enemy.position.y, target.position.z));
                 
+                // Bot hareketi
                 if (Date.now() - enemy.newTargetTime > 5000 || enemy.position.distanceTo(enemy.targetPosition) < 1) {
                     enemy.targetPosition.set(
                         (Math.random() - 0.5) * mapSize * 0.9,
@@ -529,34 +587,147 @@
                 const moveDirection = new THREE.Vector3().subVectors(enemy.targetPosition, enemy.position).normalize();
                 enemy.position.add(moveDirection.multiplyScalar(enemy.movementSpeed));
 
+                // Ateş etme
                 if (Date.now() - enemy.lastFireTime > enemy.fireRate) {
-                    fireEnemyBullet(enemy);
+                    fireBotBullet(enemy, target);
                     enemy.lastFireTime = Date.now();
                 }
             });
         }
         
-        function fireEnemyBullet(enemy) {
-            const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-            const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xe74c3c });
-            const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+        function updateTeammates() {
+            teammates.forEach(teammate => {
+                const target = findNearestTarget(teammate, enemies);
+                if (!target) return;
 
-            bullet.position.copy(enemy.position);
+                // En yakın düşmana dönme
+                teammate.lookAt(new THREE.Vector3(target.position.x, teammate.position.y, target.position.z));
+
+                // Bot hareketi
+                if (Date.now() - teammate.newTargetTime > 5000 || teammate.position.distanceTo(teammate.targetPosition) < 1) {
+                    teammate.targetPosition.set(
+                        (Math.random() - 0.5) * mapSize * 0.9,
+                        teammate.position.y,
+                        (Math.random() - 0.5) * mapSize * 0.9
+                    );
+                    teammate.newTargetTime = Date.now();
+                }
+
+                const moveDirection = new THREE.Vector3().subVectors(teammate.targetPosition, teammate.position).normalize();
+                teammate.position.add(moveDirection.multiplyScalar(teammate.movementSpeed));
+
+                // Ateş etme
+                if (Date.now() - teammate.lastFireTime > teammate.fireRate) {
+                    fireBotBullet(teammate, target);
+                    teammate.lastFireTime = Date.now();
+                }
+            });
+        }
+
+        function fireBotBullet(bot, target) {
+            const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const bulletMaterial = new THREE.MeshBasicMaterial({ color: bot.type === 'enemy' ? 0xe74c3c : 0x27ae60 });
+            const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+            bullet.type = bot.type;
+
+            bullet.position.copy(bot.position);
             bullet.position.y = 1.2;
-            const direction = new THREE.Vector3().subVectors(camera.position, enemy.position).normalize();
+            const direction = new THREE.Vector3().subVectors(target.position, bot.position).normalize();
             bullet.velocity = direction.multiplyScalar(20);
             scene.add(bullet);
-            enemyBullets.push(bullet);
+            
+            if (bot.type === 'enemy') {
+                enemyBullets.push(bullet);
+            } else {
+                teammateBullets.push(bullet);
+            }
         }
         
         function updateBullets() {
+            // Player bullets
             for(let i = playerBullets.length - 1; i >= 0; i--) {
                 const bullet = playerBullets[i];
                 bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
-
-                if (bullet.position.distanceTo(camera.position) > 100) {
+                
+                if (bullet.position.distanceTo(camera.position) > 200) {
                     scene.remove(bullet);
                     playerBullets.splice(i, 1);
+                    continue;
+                }
+
+                const bulletBox = new THREE.Box3().setFromObject(bullet);
+                let hitTarget = false;
+                
+                for(let j = enemies.length - 1; j >= 0; j--) {
+                    const enemy = enemies[j];
+                    const enemyBox = new THREE.Box3().setFromObject(enemy);
+                    if (bulletBox.intersectsBox(enemyBox)) {
+                        enemy.health -= 25;
+                        if (enemy.health <= 0) {
+                            scene.remove(enemy);
+                            enemies.splice(j, 1);
+                        }
+                        scene.remove(bullet);
+                        playerBullets.splice(i, 1);
+                        hitTarget = true;
+                        break;
+                    }
+                }
+                if (hitTarget) continue;
+            }
+            
+            // Enemy bullets
+            for(let i = enemyBullets.length - 1; i >= 0; i--) {
+                const bullet = enemyBullets[i];
+                bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
+
+                if (bullet.position.distanceTo(camera.position) > 200) {
+                    scene.remove(bullet);
+                    enemyBullets.splice(i, 1);
+                    continue;
+                }
+
+                // Oyuncu ile çarpışma kontrolü
+                if (bullet.position.distanceTo(camera.position) < 0.5) {
+                    playerHealth -= 10;
+                    playerHealthElement.innerText = playerHealth;
+                    if (playerHealth <= 0) {
+                        showStatusMessage("OYUN BİTTİ! Yeniden oynamak için sayfayı yenileyin.", 'error');
+                        return;
+                    }
+                    scene.remove(bullet);
+                    enemyBullets.splice(i, 1);
+                    continue;
+                }
+
+                // Takım arkadaşlarıyla çarpışma kontrolü
+                let hitTeammate = false;
+                for(let j = teammates.length - 1; j >= 0; j--) {
+                    const teammate = teammates[j];
+                    const teammateBox = new THREE.Box3().setFromObject(teammate);
+                    if (bullet.position.distanceTo(teammate.position) < 0.5) {
+                        teammate.health -= 10;
+                        if (teammate.health <= 0) {
+                            scene.remove(teammate);
+                            teammates.splice(j, 1);
+                        }
+                        scene.remove(bullet);
+                        enemyBullets.splice(i, 1);
+                        hitTeammate = true;
+                        break;
+                    }
+                }
+                if (hitTeammate) continue;
+            }
+
+            // Teammate bullets
+            for(let i = teammateBullets.length - 1; i >= 0; i--) {
+                const bullet = teammateBullets[i];
+                bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
+
+                if (bullet.position.distanceTo(camera.position) > 200) {
+                    scene.remove(bullet);
+                    teammateBullets.splice(i, 1);
                     continue;
                 }
 
@@ -572,36 +743,12 @@
                             enemies.splice(j, 1);
                         }
                         scene.remove(bullet);
-                        playerBullets.splice(i, 1);
+                        teammateBullets.splice(i, 1);
                         hitEnemy = true;
                         break;
                     }
                 }
                 if (hitEnemy) continue;
-            }
-
-            for(let i = enemyBullets.length - 1; i >= 0; i--) {
-                const bullet = enemyBullets[i];
-                bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
-
-                if (bullet.position.distanceTo(camera.position) > 100) {
-                    scene.remove(bullet);
-                    enemyBullets.splice(i, 1);
-                    continue;
-                }
-
-                const playerBox = new THREE.Box3().setFromObject(camera);
-                const bulletBox = new THREE.Box3().setFromObject(bullet);
-                if (bulletBox.intersectsBox(playerBox)) {
-                    playerHealth -= 10;
-                    playerHealthElement.innerText = playerHealth;
-                    if (playerHealth <= 0) {
-                        showStatusMessage("OYUN BİTTİ! Yeniden oynamak için sayfayı yenileyin.", 'error');
-                        return;
-                    }
-                    scene.remove(bullet);
-                    enemyBullets.splice(i, 1);
-                }
             }
         }
         
