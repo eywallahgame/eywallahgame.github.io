@@ -101,7 +101,7 @@
         let teammateBullets = [];
 
         const playerHeight = 1.8;
-        const playerSpeed = 0.05;
+        const playerSpeed = 0.1; // Hız arttırıldı
         const turnSpeed = 0.03;
         let playerHealth = 100;
         let currentAmmo = 30;
@@ -622,16 +622,13 @@
                 }
                 
                 if (enemy.state === 'attack') {
-                    // Oyuncuya veya takım arkadaşına dönme
                     enemy.lookAt(new THREE.Vector3(target.position.x, enemy.position.y, target.position.z));
                     
-                    // Çok yakınsa geri çekil
                     if(distanceToTarget < minDistance) {
                         const awayDirection = new THREE.Vector3().subVectors(enemy.position, target.position).normalize();
                         enemy.position.add(awayDirection.multiplyScalar(enemy.movementSpeed));
                     }
                     
-                    // Ateş etme
                     if (Date.now() - enemy.lastFireTime > enemy.fireRate) {
                         fireBotBullet(enemy, target);
                         enemy.lastFireTime = Date.now();
