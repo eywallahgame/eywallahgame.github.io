@@ -18,6 +18,8 @@
             color: var(--light-text);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
+            margin: 0;
+            overflow-x: hidden;
         }
 
         .navbar-brand {
@@ -158,6 +160,7 @@
             text-shadow: 2px 2px 4px black;
             pointer-events: none;
             z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
         }
         #game-info-overlay h3 { font-size: 2rem; }
         #game-info-overlay p { font-size: 1.2rem; }
@@ -170,9 +173,10 @@
             height: 150px;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.2);
-            display: flex;
+            display: none; /* Varsayılan olarak gizli */
             justify-content: center;
             align-items: center;
+            z-index: 200;
         }
         #joystick-handle {
             width: 70px;
@@ -193,6 +197,7 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
             opacity: 0.5;
+            z-index: 200;
         }
         footer {
             background-color: #111;
@@ -242,19 +247,22 @@
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="feature-item">
-                        <div class="feature-icon">⚔</div> <h3>Yenilenen Haritalar</h3>
+                        <div class="feature-icon">⚔</div>
+                        <h3>Yenilenen Haritalar</h3>
                         <p>Favori haritalarınız, Source 2 motoru ile baştan aşağı yenilendi.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="feature-item">
-                        <div class="feature-icon">🔥</div> <h3>Dinamik Sis Bombaları</h3>
+                        <div class="feature-icon">🔥</div>
+                        <h3>Dinamik Sis Bombaları</h3>
                         <p>Sis bombaları artık çevre ile etkileşime giriyor ve mermi geçişlerine göre dağılıyor.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="feature-item">
-                        <div class="feature-icon">📦</div> <h3>Geliştirilmiş Eşyalar</h3>
+                        <div class="feature-icon">📦</div>
+                        <h3>Geliştirilmiş Eşyalar</h3>
                         <p>Yeni silah modelleri, animasyonlar ve efektlerle daha gerçekçi bir deneyim.</p>
                     </div>
                 </div>
