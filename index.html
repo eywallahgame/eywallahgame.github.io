@@ -101,7 +101,7 @@
         let teammateBullets = [];
 
         const playerHeight = 1.8;
-        const playerSpeed = 0.1; // Hız arttırıldı
+        const playerSpeed = 0.2; // Hız tekrar arttırıldı
         const turnSpeed = 0.03;
         let playerHealth = 100;
         let currentAmmo = 30;
@@ -110,24 +110,24 @@
         let isReloading = false;
         const maxEnemies = 5;
         const maxTeammates = 5;
-        const mapSize = 200;
+        const mapSize = 150; // Harita boyutu küçültüldü
         const respawnTime = 3000;
 
         const teammateSpawnPoints = [
-            new THREE.Vector3(80, 0.9, 80),
-            new THREE.Vector3(80, 0.9, 60),
-            new THREE.Vector3(60, 0.9, 80),
-            new THREE.Vector3(60, 0.9, 60),
-            new THREE.Vector3(70, 0.9, 70),
-            new THREE.Vector3(90, 0.9, 90)
+            new THREE.Vector3(60, 0.9, 60), // Spawn noktaları yaklaştırıldı
+            new THREE.Vector3(60, 0.9, 40),
+            new THREE.Vector3(40, 0.9, 60),
+            new THREE.Vector3(40, 0.9, 40),
+            new THREE.Vector3(50, 0.9, 50),
+            new THREE.Vector3(70, 0.9, 70)
         ];
         const enemySpawnPoints = [
-            new THREE.Vector3(-80, 0.9, -80),
-            new THREE.Vector3(-80, 0.9, -60),
-            new THREE.Vector3(-60, 0.9, -80),
-            new THREE.Vector3(-60, 0.9, -60),
-            new THREE.Vector3(-70, 0.9, -70),
-            new THREE.Vector3(-90, 0.9, -90)
+            new THREE.Vector3(-60, 0.9, -60), // Spawn noktaları yaklaştırıldı
+            new THREE.Vector3(-60, 0.9, -40),
+            new THREE.Vector3(-40, 0.9, -60),
+            new THREE.Vector3(-40, 0.9, -40),
+            new THREE.Vector3(-50, 0.9, -50),
+            new THREE.Vector3(-70, 0.9, -70)
         ];
 
         let moveJoystickActive = false;
@@ -282,13 +282,13 @@
                 new THREE.Mesh(new THREE.BoxGeometry(8, 3, 8), boxMaterial),
                 new THREE.Mesh(new THREE.BoxGeometry(6, 6, 6), boxMaterial)
             ];
-            boxes[0].position.set(20, 1, -15);
-            boxes[1].position.set(-10, 1.5, 25);
-            boxes[2].position.set(-25, 1.5, -10);
-            boxes[3].position.set(10, 2.5, 10);
+            boxes[0].position.set(10, 1, -5);
+            boxes[1].position.set(-20, 1.5, 15);
+            boxes[2].position.set(-15, 1.5, -20);
+            boxes[3].position.set(20, 2.5, 20);
             boxes[4].position.set(-15, 2.5, -15);
-            boxes[5].position.set(40, 2, 40);
-            boxes[6].position.set(-40, 1.5, -40);
+            boxes[5].position.set(30, 2, 30);
+            boxes[6].position.set(-30, 1.5, -30);
             boxes[7].position.set(0, 3, 0);
 
             boxes.forEach(box => scene.add(box));
@@ -599,8 +599,8 @@
                 }
                 
                 const distanceToTarget = enemy.position.distanceTo(target.position);
-                const attackDistance = 30;
-                const minDistance = 15;
+                const attackDistance = 20; // AI mesafeleri ayarlandı
+                const minDistance = 10;
 
                 if (distanceToTarget > attackDistance) {
                     enemy.state = 'patrol';
@@ -646,8 +646,8 @@
                 }
 
                 const distanceToTarget = teammate.position.distanceTo(target.position);
-                const attackDistance = 30;
-                const minDistance = 15;
+                const attackDistance = 20; // AI mesafeleri ayarlandı
+                const minDistance = 10;
 
                 if (distanceToTarget > attackDistance) {
                     teammate.state = 'patrol';
