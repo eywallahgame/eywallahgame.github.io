@@ -3,66 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Oyunlar</title>
+    <title>Eyvallah Strike</title>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: Arial, sans-serif; background-color: #2c3e50; color: #ecf0f1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .game-wrapper { display: flex; flex-direction: row; justify-content: center; gap: 20px; width: 100%; height: 100%; max-height: 800px; padding: 10px; box-sizing: border-box; }
-        .game-container { position: relative; width: 50%; height: 100%; max-width: 800px; background-color: #34495e; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: Arial, sans-serif; background-color: #2c3e50; color: #ecf0f1; height: 100vh; width: 100vw; }
+        .game-container { position: relative; width: 100%; height: 100%; background-color: #34495e; overflow: hidden; }
         .game-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #fff; font-size: 1.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .score-display, .targets-left, .game-status { position: absolute; top: 10px; left: 10px; padding: 5px 10px; background-color: rgba(0,0,0,0.5); border-radius: 5px; font-size: 1.2em; z-index: 10; }
-        .game-status { bottom: 10px; top: auto; left: 50%; transform: translateX(-50%); text-align: center; display: none; }
-        #cs2-targets-left { top: 10px; right: 10px; left: auto; }
-        #gameOverText-3d { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #e74c3c; font-size: 3em; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); z-index: 10; }
-        .controls-wrapper { position: absolute; bottom: 10px; left: 10px; right: 10px; display: none; justify-content: space-between; align-items: center; z-index: 100; }
+        .ui-panel { position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; flex-direction: column; gap: 10px; }
+        .ammo-display, .health-display { padding: 5px 10px; background-color: rgba(0,0,0,0.5); border-radius: 5px; font-size: 1.2em; text-align: center; }
+        .game-status { position: absolute; bottom: 10px; top: auto; left: 50%; transform: translateX(-50%); text-align: center; display: none; padding: 10px; background-color: rgba(0,0,0,0.7); border-radius: 5px; }
+        #cs2-look-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 99; }
+        #cs2-game-controls { display: none; position: absolute; bottom: 10px; left: 10px; right: 10px; justify-content: space-between; align-items: flex-end; z-index: 100; }
         .button { width: 60px; height: 60px; border-radius: 50%; background-color: rgba(44, 62, 80, 0.7); color: #fff; border: none; font-size: 1.5em; line-height: 60px; text-align: center; user-select: none; }
         .joystick-container { position: relative; width: 150px; height: 150px; background-color: rgba(44, 62, 80, 0.5); border-radius: 50%; }
         .joystick-knob { position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; border-radius: 50%; background-color: rgba(189, 195, 199, 0.9); transform: translate(-50%, -50%); }
-        #cs2-look-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 99; }
-        #cs2-game-controls { display: none; position: absolute; bottom: 10px; left: 10px; right: 10px; justify-content: space-between; align-items: flex-end; z-index: 100; }
         .cs2-buttons { display: flex; flex-direction: column; gap: 10px; }
-        .car-buttons { position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; z-index: 100; }
-        .car-buttons .button-group { display: flex; gap: 10px; }
-        #fullscreen-button, #pause-button { position: absolute; top: 10px; right: 10px; width: 50px; height: 50px; border-radius: 50%; background-color: rgba(44, 62, 80, 0.7); color: #fff; border: none; font-size: 1em; line-height: 50px; text-align: center; z-index: 101; }
-        @media (max-width: 768px) {
-            .game-wrapper { flex-direction: column; align-items: center; }
-            .game-container { width: 95%; height: 50%; max-height: 400px; }
-        }
+        .reload-button { width: 60px; height: 60px; border-radius: 50%; background-color: rgba(230, 126, 34, 0.7); color: #fff; border: none; font-size: 1.2em; line-height: 60px; text-align: center; user-select: none; }
     </style>
 </head>
 <body>
-    <div class="game-wrapper">
-        <div id="game-container-car" class="game-container">
-            <div class="game-info" id="car-game-info">Oynamak için Tıklayın</div>
-            <div class="score-display">Puan: <span id="score-3d">0</span></div>
-            <div id="gameOverText-3d">GAME OVER!</div>
-            <button id="fullscreen-button">Tam Ekran</button>
-            <button id="pause-button">Duraklat</button>
-            <div class="car-buttons">
-                <div class="button-group">
-                    <button id="left-button" class="button">&#8592;</button>
-                    <button id="right-button" class="button">&#8594;</button>
-                </div>
-                <div class="button-group">
-                    <button id="gas-button" class="button">&#9650;</button>
-                    <button id="brake-button" class="button">&#9660;</button>
-                </div>
-            </div>
+    <div id="eyvallah-strike-container" class="game-container">
+        <div class="ui-panel">
+            <div class="health-display">Can: <span id="player-health">100</span></div>
+            <div class="ammo-display"><span id="current-ammo">30</span> / <span id="max-ammo">30</span></div>
         </div>
-
-        <div id="cs2-game-container" class="game-container">
-            <div class="game-info" id="cs2-game-info">Oynamak için Tıklayın</div>
-            <div class="score-display">Puan: <span id="cs2-score">0</span></div>
-            <div class="targets-left">Hedef: <span id="cs2-targets-left">10</span></div>
-            <div class="game-status" id="cs2-game-status"></div>
-            <div id="cs2-look-panel"></div>
-            <div id="cs2-game-controls">
-                <div id="cs2-joystick-container" class="joystick-container">
-                    <div id="cs2-joystick-knob" class="joystick-knob"></div>
-                </div>
-                <div class="cs2-buttons">
-                    <button id="jump-button" class="button">Zıpla</button>
-                    <button id="fire-button" class="button">Ateş Et</button>
-                </div>
+        <div class="game-status" id="game-status"></div>
+        <div id="cs2-look-panel"></div>
+        <div id="cs2-game-controls">
+            <div id="cs2-joystick-container" class="joystick-container">
+                <div id="cs2-joystick-knob" class="joystick-knob"></div>
+            </div>
+            <div class="cs2-buttons">
+                <button id="jump-button" class="button">Zıpla</button>
+                <button id="fire-button" class="button">Ateş Et</button>
+                <button id="reload-button" class="reload-button">Şarjör</button>
             </div>
         </div>
     </div>
@@ -75,492 +48,95 @@
     <script type="module">
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.126.0/build/three.module.js';
 
-        // ARABA OYUNU KODU BURADA
-        const gameContainerCar = document.getElementById('game-container-car');
-        const scoreElement = document.getElementById('score-3d');
-        const gameOverText = document.getElementById('gameOverText-3d');
-        const fullscreenButton = document.getElementById('fullscreen-button');
-        const pauseButton = document.getElementById('pause-button');
-
-        const leftButtonCar = document.getElementById('left-button');
-        const rightButtonCar = document.getElementById('right-button');
-        const gasButton = document.getElementById('gas-button');
-        const brakeButton = document.getElementById('brake-button');
-
-        let sceneCar, cameraCar, rendererCar, playerCar, gameRunning = false, score = 0, isPaused = false;
-        const otherCars = [];
-        const environmentObjects = [];
-        const roadChunks = [];
-
-        let playerSpeed = 0.15;
-        let targetSpeed = 0.15;
-        const maxSpeed = 0.3;
-        const minSpeed = 0.08;
-
-        let lateralVelocity = 0;
-        let lateralAcceleration = 0.005;
-        const maxLateralAcceleration = 0.01;
-        let maxLateralSpeed = 0.05;
-        const maxMaxLateralSpeed = 0.1;
-
-        const roadWidth = 6.3;
-        const playerXMin = -(roadWidth / 2) + 0.5;
-        const playerXMax = (roadWidth / 2) - 0.5;
-
-        const spawnDistance = 50;
-        const despawnDistance = 10;
-
-        const roadChunkSize = 100;
-
-        const defaultCameraFov = 90;
-        const defaultCameraPosition = new THREE.Vector3(0, 3, 10);
-        const pauseCameraFov = 110;
-        const pauseCameraPosition = new THREE.Vector3(0, 5, 12);
-
-        function initCarGame() {
-            sceneCar = new THREE.Scene();
-            sceneCar.background = new THREE.Color(0x87ceeb);
-
-            cameraCar = new THREE.PerspectiveCamera(defaultCameraFov, gameContainerCar.clientWidth / gameContainerCar.clientHeight, 0.1, 1000);
-            cameraCar.position.copy(defaultCameraPosition);
-            cameraCar.rotation.x = -Math.PI / 8;
-
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            sceneCar.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(0, 10, 5);
-            sceneCar.add(directionalLight);
-
-            playerCar = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 1), new THREE.MeshLambertMaterial({ color: 0x27ae60 }));
-            playerCar.position.set(0, 0.25, 4);
-            sceneCar.add(playerCar);
-
-            rendererCar = new THREE.WebGLRenderer({ antialias: true });
-            rendererCar.setSize(gameContainerCar.clientWidth, gameContainerCar.clientHeight);
-            rendererCar.setPixelRatio(window.devicePixelRatio);
-            gameContainerCar.appendChild(rendererCar.domElement);
-
-            createInitialRoad();
-            spawnInitialCars();
-            spawnInitialEnvironmentObjects();
-
-            document.addEventListener('keydown', onKeyDownCar);
-            document.addEventListener('keyup', onKeyUpCar);
-            window.addEventListener('resize', onResizeCar);
-            gameContainerCar.addEventListener('click', startGameCar);
-
-            leftButtonCar.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('left'); });
-            rightButtonCar.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('right'); });
-            gasButton.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('gas'); });
-            brakeButton.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('brake'); });
-
-            leftButtonCar.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('left'); });
-            rightButtonCar.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('right'); });
-            gasButton.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('gas'); });
-            brakeButton.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('brake'); });
-
-            leftButtonCar.addEventListener('mousedown', () => onButtonPressCar('left'));
-            leftButtonCar.addEventListener('mouseup', () => onButtonReleaseCar('left'));
-            leftButtonCar.addEventListener('mouseout', () => onButtonReleaseCar('left'));
-            rightButtonCar.addEventListener('mousedown', () => onButtonPressCar('right'));
-            rightButtonCar.addEventListener('mouseup', () => onButtonReleaseCar('right'));
-            rightButtonCar.addEventListener('mouseout', () => onButtonReleaseCar('right'));
-            gasButton.addEventListener('mousedown', () => onButtonPressCar('gas'));
-            gasButton.addEventListener('mouseup', () => onButtonReleaseCar('gas'));
-            gasButton.addEventListener('mouseout', () => onButtonReleaseCar('gas'));
-            brakeButton.addEventListener('mousedown', () => onButtonPressCar('brake'));
-            brakeButton.addEventListener('mouseup', () => onButtonReleaseCar('brake'));
-            brakeButton.addEventListener('mouseout', () => onButtonReleaseCar('brake'));
-
-            fullscreenButton.addEventListener('click', toggleFullscreenCar);
-            pauseButton.addEventListener('click', togglePauseCar);
-
-            animateCarGame();
-        }
-
-        function createRoadChunk(positionZ) {
-            const chunk = new THREE.Group();
-            const roadGeometry = new THREE.BoxGeometry(roadWidth, 0.1, roadChunkSize);
-            const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x4a6566 });
-            const roadMesh = new THREE.Mesh(roadGeometry, roadMaterial);
-            roadMesh.position.z = positionZ;
-            chunk.add(roadMesh);
-            const lineGeometry = new THREE.BoxGeometry(0.1, 0.1, 1);
-            const lineMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-            for (let i = positionZ - roadChunkSize / 2; i < positionZ + roadChunkSize / 2; i += 2) {
-                const line1 = new THREE.Mesh(lineGeometry, lineMaterial);
-                line1.position.set(-2.1, 0.06, i);
-                chunk.add(line1);
-                const line2 = new THREE.Mesh(lineGeometry, lineMaterial);
-                line2.position.set(-0.7, 0.06, i);
-                chunk.add(line2);
-                const line3 = new THREE.Mesh(lineGeometry, lineMaterial);
-                line3.position.set(0.7, 0.06, i);
-                chunk.add(line3);
-                const line4 = new THREE.Mesh(lineGeometry, lineMaterial);
-                line4.position.set(2.1, 0.06, i);
-                chunk.add(line4);
-            }
-            return chunk;
-        }
-
-        function createInitialRoad() {
-            for(let i = -3; i < 3; i++) {
-                const chunk = createRoadChunk(i * roadChunkSize);
-                sceneCar.add(chunk);
-                roadChunks.push(chunk);
-            }
-        }
-
-        function createBillboardTexture(text) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 256;
-            const context = canvas.getContext('2d');
-            context.fillStyle = '#2c3e50';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            context.font = 'bold 48px Arial';
-            context.fillStyle = '#1abc9c';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(text, canvas.width / 2, canvas.height / 2);
-            return new THREE.CanvasTexture(canvas);
-        }
-
-        function createTree() {
-            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
-            const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
-            const leafGeometry = new THREE.ConeGeometry(1, 2, 8);
-            const leafMaterial = new THREE.MeshLambertMaterial({ color: 0x228b22 });
-            const baseGeometry = new THREE.BoxGeometry(2, 0.1, 2);
-            const baseMaterial = new THREE.MeshLambertMaterial({ color: 0x228b22 });
-
-            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-            const leaves = new THREE.Mesh(leafGeometry, leafMaterial);
-            const base = new THREE.Mesh(baseGeometry, baseMaterial);
-
-            leaves.position.y = 1.5;
-            trunk.position.y = 1;
-            base.position.y = 0.05;
-
-            const tree = new THREE.Group();
-            tree.add(trunk);
-            tree.add(leaves);
-            tree.add(base);
-            return tree;
-        }
-
-        function createBillboard() {
-            const billboardGeometry = new THREE.BoxGeometry(4, 2, 0.2);
-            const billboardTexture = createBillboardTexture('Eyvallah Turkish Restaurant');
-            const billboardMaterial = new THREE.MeshBasicMaterial({ map: billboardTexture });
-            const billboardMesh = new THREE.Mesh(billboardGeometry, billboardMaterial);
-            billboardMesh.position.y = 2;
-            return billboardMesh;
-        }
-
-        function spawnInitialCars() {
-            for (let i = 0; i < 20; i++) {
-                spawnNewCar();
-            }
-        }
-
-        function spawnNewCar() {
-            const car = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 1), new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }));
-            const laneIndex = (Math.floor(Math.random() * 6) - 2.5) * 1.4;
-            const zPosition = cameraCar.position.z - spawnDistance - Math.random() * 50;
-            car.position.set(laneIndex, 0.25, zPosition);
-            car.speed = (Math.random() * 0.1) + 0.05;
-            sceneCar.add(car);
-            otherCars.push(car);
-        }
-
-        function spawnInitialEnvironmentObjects() {
-            for (let i = 0; i < 50; i++) {
-                spawnNewEnvironmentObject();
-            }
-        }
-
-        function spawnNewEnvironmentObject() {
-            let obj;
-            if (Math.random() > 0.9) {
-                obj = createBillboard();
-                obj.position.x = (Math.random() > 0.5 ? 1 : -1) * (roadWidth / 2 + 3);
-            } else {
-                obj = createTree();
-                obj.position.x = (Math.random() > 0.5 ? 1 : -1) * (roadWidth / 2 + 1 + Math.random() * 5);
-            }
-            obj.position.z = cameraCar.position.z - spawnDistance - Math.random() * 100;
-            sceneCar.add(obj);
-            environmentObjects.push(obj);
-        }
-
-        function startGameCar() {
-            if (gameRunning) return;
-            gameRunning = true;
-            score = 0;
-            playerSpeed = 0.15;
-            targetSpeed = 0.15;
-            lateralAcceleration = 0.005;
-            maxLateralSpeed = 0.05;
-            gameOverText.style.display = 'none';
-            pauseButton.innerText = 'Duraklat';
-            isPaused = false;
-
-            otherCars.forEach(car => {
-                car.position.z = cameraCar.position.z - spawnDistance - Math.random() * 50;
-                car.speed = (Math.random() * 0.1) + 0.05;
-            });
-
-            environmentObjects.forEach(obj => {
-                obj.position.z = cameraCar.position.z - spawnDistance - Math.random() * 100;
-            });
-
-            animateCarGame();
-        }
-
-        function togglePauseCar() {
-            if (!gameRunning) return;
-            isPaused = !isPaused;
-            if (isPaused) {
-                pauseButton.innerText = 'Devam Et';
-                cameraCar.fov = pauseCameraFov;
-                cameraCar.position.copy(pauseCameraPosition);
-                cameraCar.updateProjectionMatrix();
-            } else {
-                pauseButton.innerText = 'Duraklat';
-                cameraCar.fov = defaultCameraFov;
-                cameraCar.position.copy(defaultCameraPosition);
-                cameraCar.updateProjectionMatrix();
-                animateCarGame();
-            }
-        }
-
-        function onKeyDownCar(event) {
-            if (!gameRunning) return;
-            if (event.key === 'p' || event.key === 'P') {
-                togglePauseCar();
-            }
-            if (isPaused) return;
-
-            if (event.key === 'ArrowLeft') {
-                lateralVelocity = -maxLateralSpeed;
-            } else if (event.key === 'ArrowRight') {
-                lateralVelocity = maxLateralSpeed;
-            } else if (event.key === 'ArrowUp') {
-                targetSpeed = maxSpeed;
-            } else if (event.key === 'ArrowDown') {
-                targetSpeed = minSpeed;
-            }
-        }
-
-        function onKeyUpCar(event) {
-            if (!gameRunning || isPaused) return;
-            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-                lateralVelocity = 0;
-            } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-                targetSpeed = playerSpeed;
-            }
-        }
-
-        function onButtonPressCar(direction) {
-            if (!gameRunning || isPaused) return;
-            if (direction === 'left') {
-                lateralVelocity = -maxLateralSpeed;
-            } else if (direction === 'right') {
-                lateralVelocity = maxLateralSpeed;
-            } else if (direction === 'gas') {
-                targetSpeed = maxSpeed;
-            } else if (direction === 'brake') {
-                targetSpeed = minSpeed;
-            }
-        }
-
-        function onButtonReleaseCar(direction) {
-            if (!gameRunning || isPaused) return;
-            if (direction === 'left' || direction === 'right') {
-                lateralVelocity = 0;
-            } else if (direction === 'gas' || direction === 'brake') {
-                targetSpeed = playerSpeed;
-            }
-        }
-
-        function updateCarGame() {
-            if (!gameRunning || isPaused) return;
-
-            playerSpeed += (targetSpeed - playerSpeed) * 0.05;
-
-            lateralAcceleration = Math.min(lateralAcceleration + 0.000005, maxLateralAcceleration);
-            maxLateralSpeed = Math.min(maxLateralSpeed + 0.000005, maxMaxLateralSpeed);
-
-            playerCar.position.x += lateralVelocity;
-            playerCar.position.x = Math.max(playerXMin, Math.min(playerXMax, playerCar.position.x));
-
-            const moveDistance = playerSpeed;
-
-            roadChunks.forEach(chunk => {
-                chunk.position.z += moveDistance;
-                if(chunk.position.z > cameraCar.position.z + despawnDistance + roadChunkSize / 2) {
-                    chunk.position.z -= roadChunks.length * roadChunkSize;
-                }
-            });
-
-            otherCars.forEach((car, index) => {
-                const relativeSpeed = moveDistance - car.speed;
-                car.position.z += relativeSpeed;
-
-                if (car.position.z > cameraCar.position.z + despawnDistance) {
-                    sceneCar.remove(car);
-                    otherCars.splice(index, 1);
-                    spawnNewCar();
-                }
-            });
-
-            environmentObjects.forEach((obj, index) => {
-                obj.position.z += moveDistance;
-                if (obj.position.z > cameraCar.position.z + despawnDistance) {
-                    sceneCar.remove(obj);
-                    environmentObjects.splice(index, 1);
-                    spawnNewEnvironmentObject();
-                }
-            });
-
-            checkCollisions();
-
-            score += moveDistance * 10;
-            scoreElement.innerText = Math.floor(score);
-        }
-
-        function checkCollisions() {
-            const playerBox = new THREE.Box3().setFromObject(playerCar);
-            otherCars.forEach(car => {
-                const carBox = new THREE.Box3().setFromObject(car);
-                if (playerBox.intersectsBox(carBox)) {
-                    gameRunning = false;
-                    gameOverText.style.display = 'block';
-                }
-            });
-        }
-
-        function onResizeCar() {
-            cameraCar.aspect = gameContainerCar.clientWidth / gameContainerCar.clientHeight;
-            cameraCar.updateProjectionMatrix();
-            rendererCar.setSize(gameContainerCar.clientWidth, gameContainerCar.clientHeight);
-        }
-
-        function toggleFullscreenCar() {
-            if (!document.fullscreenElement) {
-                gameContainerCar.requestFullscreen().catch(err => {
-                    alert(`Tam ekran moduna geçilemedi: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        function animateCarGame() {
-            if (gameRunning && !isPaused) {
-                requestAnimationFrame(animateCarGame);
-                updateCarGame();
-                rendererCar.render(sceneCar, cameraCar);
-            }
-        }
-
-        initCarGame();
-
-        // CS2 BENZERİ OYUN KODU BURADA
-        const gameContainerCS2 = document.getElementById('cs2-game-container');
-        const infoCS2 = document.getElementById('cs2-game-info');
-        const targetsLeftElement = document.getElementById('cs2-targets-left');
-        const scoreCS2Element = document.getElementById('cs2-score');
-        const gameStatusElement = document.getElementById('cs2-game-status');
-
+        const gameContainer = document.getElementById('eyvallah-strike-container');
+        const gameStatusElement = document.getElementById('game-status');
+        const playerHealthElement = document.getElementById('player-health');
+        const currentAmmoElement = document.getElementById('current-ammo');
+        const maxAmmoElement = document.getElementById('max-ammo');
+        
         const cs2Controls = document.getElementById('cs2-game-controls');
         const moveJoystickContainer = document.getElementById('cs2-joystick-container');
         const fireButton = document.getElementById('fire-button');
         const jumpButton = document.getElementById('jump-button');
+        const reloadButton = document.getElementById('reload-button');
         const lookPanel = document.getElementById('cs2-look-panel');
 
-        let sceneCS2, cameraCS2, rendererCS2;
+        let scene, camera, renderer;
         let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-        let velocityCS2 = new THREE.Vector3();
-        let directionCS2 = new THREE.Vector3();
+        let velocity = new THREE.Vector3();
+        let direction = new THREE.Vector3();
         let canJump = false;
-        let targets = [];
-        let bullets = [];
-        let scoreCS2 = 0;
-        let targetCount = 10;
+        let enemies = [];
+        let playerBullets = [];
+        let enemyBullets = [];
 
         const playerHeight = 1.8;
-        const playerSpeedCS2 = 0.05;
+        const playerSpeed = 0.05;
+        let playerHealth = 100;
+        let currentAmmo = 30;
+        const maxAmmo = 30;
+        const reloadTime = 2000;
+        let isReloading = false;
 
-        // Joystick için değişkenler
         let moveJoystickActive = false;
         let moveJoystickCenter = { x: 0, y: 0 };
         let moveJoystickPos = { x: 0, y: 0 };
         const moveJoystickRadius = 75;
 
-        // Look Panel için değişkenler
         let lookTouchIdentifier = null;
         let prevTouchX = 0;
         let prevTouchY = 0;
         const lookSensitivity = 0.005;
 
-        function initCS2Game() {
-            sceneCS2 = new THREE.Scene();
-            sceneCS2.background = new THREE.Color(0x87ceeb);
-            sceneCS2.fog = new THREE.Fog(0x87ceeb, 0, 750);
+        function initGame() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb);
+            scene.fog = new THREE.Fog(0x87ceeb, 0, 750);
 
-            cameraCS2 = new THREE.PerspectiveCamera(75, gameContainerCS2.clientWidth / gameContainerCS2.clientHeight, 0.1, 1000);
-            cameraCS2.position.y = playerHeight;
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.y = playerHeight;
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            sceneCS2.add(ambientLight);
+            scene.add(ambientLight);
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(10, 20, 10);
-            sceneCS2.add(directionalLight);
+            scene.add(directionalLight);
 
             const groundGeometry = new THREE.PlaneGeometry(500, 500);
             const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
             const ground = new THREE.Mesh(groundGeometry, groundMaterial);
             ground.rotation.x = -Math.PI / 2;
             ground.position.y = -0.1;
-            sceneCS2.add(ground);
+            scene.add(ground);
 
-            rendererCS2 = new THREE.WebGLRenderer({ antialias: true });
-            rendererCS2.setSize(gameContainerCS2.clientWidth, gameContainerCS2.clientHeight);
-            rendererCS2.setPixelRatio(window.devicePixelRatio);
-            gameContainerCS2.appendChild(rendererCS2.domElement);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            gameContainer.appendChild(renderer.domElement);
+            
+            // Set initial UI
+            playerHealthElement.innerText = playerHealth;
+            currentAmmoElement.innerText = currentAmmo;
+            maxAmmoElement.innerText = maxAmmo;
 
             createWalls();
-            spawnTargets();
+            spawnEnemies();
 
-            gameContainerCS2.addEventListener('mousedown', onMouseDownCS2, false);
-            gameContainerCS2.addEventListener('click', () => {
-                if (isMobileDevice()) {
-                    toggleFullscreenCS2();
-                } else {
-                    if (document.pointerLockElement !== rendererCS2.domElement) {
-                        rendererCS2.domElement.requestPointerLock();
-                        infoCS2.style.display = 'none';
-                        gameStatusElement.innerText = "Oyun başladı! Tüm hedefleri vur.";
-                        gameStatusElement.style.display = 'block';
-                    }
-                }
-            });
-
-            document.addEventListener('keydown', onKeyDownCS2, false);
-            document.addEventListener('keyup', onKeyUpCS2, false);
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+            window.addEventListener('resize', onResize);
             document.addEventListener('pointerlockchange', onPointerlockChange, false);
-
+            gameContainer.addEventListener('mousedown', onMouseDown, false);
+            
             if (isMobileDevice()) {
-                infoCS2.style.display = 'none';
                 cs2Controls.style.display = 'flex';
                 lookPanel.addEventListener('touchstart', onLookStart, false);
                 lookPanel.addEventListener('touchmove', onLookMove, false);
                 lookPanel.addEventListener('touchend', onLookEnd, false);
+                fireButton.addEventListener('touchstart', (e) => { e.preventDefault(); onFire(); });
+                jumpButton.addEventListener('touchstart', () => { if(canJump) velocity.y = 10; canJump = false; });
+                reloadButton.addEventListener('touchstart', onReload);
             } else {
-                infoCS2.style.display = 'block';
                 cs2Controls.style.display = 'none';
                 lookPanel.style.display = 'none';
             }
@@ -569,16 +145,26 @@
             moveJoystickContainer.addEventListener('touchmove', onMoveJoystickMove, false);
             moveJoystickContainer.addEventListener('touchend', onMoveJoystickEnd, false);
 
-            fireButton.addEventListener('touchstart', (e) => { e.preventDefault(); onFireCS2(); });
-            jumpButton.addEventListener('touchstart', () => {
-                if(canJump) velocityCS2.y = 10;
-                canJump = false;
+            document.addEventListener('DOMContentLoaded', () => {
+                enterFullscreenAndPointerLock();
             });
 
-            window.addEventListener('resize', onResizeCS2);
-            window.addEventListener('orientationchange', onOrientationChange);
-
-            animateCS2();
+            animate();
+        }
+        
+        function enterFullscreenAndPointerLock() {
+            if (isMobileDevice()) {
+                if (!document.fullscreenElement) {
+                    gameContainer.requestFullscreen().catch(err => {
+                        console.log(`Tam ekran moduna geçilemedi: ${err.message}`);
+                    });
+                    screen.orientation.lock('landscape').catch(err => {
+                        console.log(`Yatay moda geçilemedi: ${err.message}`);
+                    });
+                }
+            } else {
+                gameContainer.requestPointerLock();
+            }
         }
 
         function isMobileDevice() {
@@ -586,44 +172,19 @@
         }
 
         function onPointerlockChange() {
-            if (document.pointerLockElement === rendererCS2.domElement) {
-                document.addEventListener('mousemove', onMouseMoveCS2, false);
-                infoCS2.style.display = 'none';
-                gameStatusElement.innerText = "Oyun başladı! Tüm hedefleri vur.";
-                gameStatusElement.style.display = 'block';
-            } else {
-                document.removeEventListener('mousemove', onMouseMoveCS2, false);
-                infoCS2.style.display = 'block';
+            if (document.pointerLockElement === gameContainer) {
+                document.addEventListener('mousemove', onMouseMove, false);
                 gameStatusElement.style.display = 'none';
-            }
-        }
-
-        function toggleFullscreenCS2() {
-            if (!document.fullscreenElement) {
-                gameContainerCS2.requestFullscreen().catch(err => {
-                    console.log(`Tam ekran moduna geçilemedi: ${err.message}`);
-                });
-                screen.orientation.lock('landscape').catch(err => {
-                    console.log(`Yatay moda geçilemedi: ${err.message}`);
-                });
             } else {
-                document.exitFullscreen();
-                screen.orientation.unlock();
+                document.removeEventListener('mousemove', onMouseMove, false);
+                showStatusMessage("Oyun Duraklatıldı. Devam etmek için tıklayın.", 'info');
             }
         }
 
-        function onOrientationChange() {
-             if (window.orientation === 90 || window.orientation === -90) {
-                if (isMobileDevice()) {
-                    toggleFullscreenCS2();
-                }
-            }
-        }
-
-        function onResizeCS2() {
-            cameraCS2.aspect = gameContainerCS2.clientWidth / gameContainerCS2.clientHeight;
-            cameraCS2.updateProjectionMatrix();
-            rendererCS2.setSize(gameContainerCS2.clientWidth, gameContainerCS2.clientHeight);
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
         function createWalls() {
@@ -639,48 +200,59 @@
             walls[2].position.set(-10, 2.5, 20);
             walls[3].position.set(-20, 2.5, 0);
 
-            walls.forEach(wall => sceneCS2.add(wall));
+            walls.forEach(wall => scene.add(wall));
+        }
+        
+        function createEnemyBot() {
+            const bodyGeometry = new THREE.BoxGeometry(1, 1.8, 1);
+            const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x3498db });
+            const headGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const headMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+
+            const bot = new THREE.Group();
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.position.y = 1.4;
+            bot.add(body);
+            bot.add(head);
+
+            bot.health = 100;
+            bot.lastFireTime = Date.now();
+            bot.fireRate = Math.random() * 2000 + 1000;
+            
+            return bot;
         }
 
-        function spawnTargets() {
-            targets.forEach(target => sceneCS2.remove(target));
-            targets = [];
-            for (let i = 0; i < targetCount; i++) {
-                const targetGeometry = new THREE.BoxGeometry(1, 1, 1);
-                const targetMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
-                const targetMesh = new THREE.Mesh(targetGeometry, targetMaterial);
-
+        function spawnEnemies() {
+            enemies.forEach(enemy => scene.remove(enemy));
+            enemies = [];
+            for (let i = 0; i < 5; i++) {
+                const enemy = createEnemyBot();
                 const x = (Math.random() - 0.5) * 40;
                 const z = (Math.random() - 0.5) * 40;
-                const y = Math.random() * 3 + 1;
-
-                targetMesh.position.set(x, y, z);
-                sceneCS2.add(targetMesh);
-                targets.push(targetMesh);
+                enemy.position.set(x, 0.9, z);
+                scene.add(enemy);
+                enemies.push(enemy);
             }
-            targetsLeftElement.innerText = targets.length;
         }
-
-        function onKeyDownCS2(event) {
+        
+        function onKeyDown(event) {
             switch (event.code) {
                 case 'KeyW': moveForward = true; break;
                 case 'KeyA': moveLeft = true; break;
                 case 'KeyS': moveBackward = true; break;
                 case 'KeyD': moveRight = true; break;
                 case 'Space':
-                    if (canJump) velocityCS2.y = 10;
+                    if (canJump) velocity.y = 10;
                     canJump = false;
                     break;
-                case 'Escape':
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                        screen.orientation.unlock();
-                    }
+                case 'KeyR':
+                    onReload();
                     break;
             }
         }
 
-        function onKeyUpCS2(event) {
+        function onKeyUp(event) {
             switch (event.code) {
                 case 'KeyW': moveForward = false; break;
                 case 'KeyA': moveLeft = false; break;
@@ -688,81 +260,62 @@
                 case 'KeyD': moveRight = false; break;
             }
         }
-
-        function onMouseMoveCS2(event) {
-            if (document.pointerLockElement === rendererCS2.domElement) {
+        
+        function onMouseMove(event) {
+            if (document.pointerLockElement === gameContainer) {
                 const movementX = event.movementX || 0;
                 const movementY = event.movementY || 0;
 
-                cameraCS2.rotation.y -= movementX * lookSensitivity;
-                const newRotationX = cameraCS2.rotation.x - movementY * lookSensitivity;
-                cameraCS2.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, newRotationX));
+                camera.rotation.y -= movementX * lookSensitivity;
+                const newRotationX = camera.rotation.x - movementY * lookSensitivity;
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, newRotationX));
             }
         }
 
-        function onMouseDownCS2(event) {
-            if (document.pointerLockElement === rendererCS2.domElement) {
+        function onMouseDown(event) {
+            if (document.pointerLockElement === gameContainer) {
                 if (event.button === 0) {
-                    onFireCS2();
+                    onFire();
                 }
             }
         }
+        
+        function onFire() {
+            if (isReloading || currentAmmo <= 0) {
+                // Sadece mermisi yoksa ses çıkar, UI'da göster.
+                // onReload çağrısı yok, kullanıcı kendisi 'R' tuşu veya butona basmalı.
+                return;
+            }
 
-        function onFireCS2() {
             const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-            const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+            const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
             const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
 
-            bullet.position.copy(cameraCS2.position);
+            bullet.position.copy(camera.position);
             const direction = new THREE.Vector3();
-            cameraCS2.getWorldDirection(direction);
+            camera.getWorldDirection(direction);
 
             bullet.velocity = direction.multiplyScalar(50);
-            sceneCS2.add(bullet);
-            bullets.push(bullet);
+            scene.add(bullet);
+            playerBullets.push(bullet);
+
+            currentAmmo--;
+            currentAmmoElement.innerText = currentAmmo;
         }
 
-        function updateBullets() {
-            for(let i = bullets.length - 1; i >= 0; i--) {
-                const bullet = bullets[i];
-                bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
-
-                if (bullet.position.distanceTo(cameraCS2.position) > 100) {
-                    sceneCS2.remove(bullet);
-                    bullets.splice(i, 1);
-                    continue;
-                }
-
-                const bulletBox = new THREE.Box3().setFromObject(bullet);
-                let hitTarget = false;
-
-                for(let j = targets.length - 1; j >= 0; j--) {
-                    const target = targets[j];
-                    const targetBox = new THREE.Box3().setFromObject(target);
-
-                    if (bulletBox.intersectsBox(targetBox)) {
-                        sceneCS2.remove(target);
-                        targets.splice(j, 1);
-
-                        scoreCS2 += 100;
-                        scoreCS2Element.innerText = scoreCS2;
-                        targetsLeftElement.innerText = targets.length;
-
-                        sceneCS2.remove(bullet);
-                        bullets.splice(i, 1);
-
-                        hitTarget = true;
-                        break;
-                    }
-                }
-
-                if (targets.length === 0) {
-                    gameStatusElement.innerText = "Tebrikler! Tüm hedefleri vurdun. Yeni bir oyun için sayfayı yenile.";
-                    gameStatusElement.style.color = 'green';
-                }
-            }
+        function onReload() {
+            if (isReloading || currentAmmo === maxAmmo) return;
+            
+            isReloading = true;
+            showStatusMessage("Şarjör dolduruluyor...", 'info');
+            setTimeout(() => {
+                currentAmmo = maxAmmo;
+                currentAmmoElement.innerText = currentAmmo;
+                isReloading = false;
+                hideStatusMessage();
+            }, reloadTime);
         }
-
+        
         function onMoveJoystickStart(e) {
             e.preventDefault();
             const touch = e.changedTouches[0];
@@ -808,7 +361,7 @@
             document.getElementById('cs2-joystick-knob').style.transform = 'translate(-50%, -50%)';
             moveJoystickPos = { x: 0, y: 0 };
         }
-
+        
         function onLookStart(e) {
             e.preventDefault();
             const touch = e.changedTouches[0];
@@ -826,9 +379,9 @@
             const dx = touch.clientX - prevTouchX;
             const dy = touch.clientY - prevTouchY;
 
-            cameraCS2.rotation.y -= dx * lookSensitivity;
-            const newRotationX = cameraCS2.rotation.x - dy * lookSensitivity;
-            cameraCS2.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, newRotationX));
+            camera.rotation.y -= dx * lookSensitivity;
+            const newRotationX = camera.rotation.x - dy * lookSensitivity;
+            camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, newRotationX));
 
             prevTouchX = touch.clientX;
             prevTouchY = touch.clientY;
@@ -840,52 +393,147 @@
             lookTouchIdentifier = null;
         }
 
-        function animateCS2() {
-            requestAnimationFrame(animateCS2);
+        function showStatusMessage(message, type) {
+            gameStatusElement.innerText = message;
+            gameStatusElement.style.color = type === 'info' ? '#ecf0f1' : '#e74c3c';
+            gameStatusElement.style.display = 'block';
+        }
+
+        function hideStatusMessage() {
+            gameStatusElement.style.display = 'none';
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
 
             const delta = 0.016;
 
-            velocityCS2.y -= 9.8 * 2.0 * delta;
+            velocity.y -= 9.8 * 2.0 * delta;
 
             if (isMobileDevice()) {
-                directionCS2.z = moveJoystickPos.y;
-                directionCS2.x = moveJoystickPos.x;
+                direction.z = moveJoystickPos.y;
+                direction.x = moveJoystickPos.x;
             } else {
-                directionCS2.z = Number(moveForward) - Number(moveBackward);
-                directionCS2.x = Number(moveRight) - Number(moveLeft);
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
             }
 
-            if (directionCS2.length() > 0) {
-                directionCS2.normalize();
+            if (direction.length() > 0) {
+                direction.normalize();
             }
 
             const forwardVector = new THREE.Vector3();
-            cameraCS2.getWorldDirection(forwardVector);
+            camera.getWorldDirection(forwardVector);
             forwardVector.y = 0;
             forwardVector.normalize();
 
             const rightVector = new THREE.Vector3();
-            rightVector.crossVectors(cameraCS2.up, forwardVector);
+            rightVector.crossVectors(camera.up, forwardVector);
             rightVector.normalize();
 
             const movement = new THREE.Vector3();
-            movement.add(forwardVector.multiplyScalar(directionCS2.z * playerSpeedCS2 * 60 * delta));
-            movement.add(rightVector.multiplyScalar(directionCS2.x * playerSpeedCS2 * 60 * delta));
+            movement.add(forwardVector.multiplyScalar(direction.z * playerSpeed * 60 * delta));
+            movement.add(rightVector.multiplyScalar(direction.x * playerSpeed * 60 * delta));
 
-            cameraCS2.position.add(movement);
-            cameraCS2.position.y += velocityCS2.y * delta;
+            camera.position.add(movement);
+            camera.position.y += velocity.y * delta;
 
-            if (cameraCS2.position.y <= playerHeight) {
-                velocityCS2.y = 0;
-                cameraCS2.position.y = playerHeight;
+            if (camera.position.y <= playerHeight) {
+                velocity.y = 0;
+                camera.position.y = playerHeight;
                 canJump = true;
             }
-
+            
+            updateEnemyBots();
             updateBullets();
-            rendererCS2.render(sceneCS2, cameraCS2);
+            
+            renderer.render(scene, camera);
         }
 
-        initCS2Game();
+        function updateEnemyBots() {
+            enemies.forEach(enemy => {
+                // Basit bir bot AI'ı: Oyuncuya doğru dön ve ateş et
+                const lookDirection = new THREE.Vector3().subVectors(camera.position, enemy.position);
+                enemy.lookAt(camera.position);
+                
+                if (Date.now() - enemy.lastFireTime > enemy.fireRate) {
+                    fireEnemyBullet(enemy);
+                    enemy.lastFireTime = Date.now();
+                }
+            });
+        }
+        
+        function fireEnemyBullet(enemy) {
+            const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xe74c3c });
+            const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+
+            bullet.position.copy(enemy.position);
+            bullet.position.y = 1.2;
+            const direction = new THREE.Vector3().subVectors(camera.position, enemy.position).normalize();
+            bullet.velocity = direction.multiplyScalar(20);
+            scene.add(bullet);
+            enemyBullets.push(bullet);
+        }
+        
+        function updateBullets() {
+            // Player bullets
+            for(let i = playerBullets.length - 1; i >= 0; i--) {
+                const bullet = playerBullets[i];
+                bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
+
+                if (bullet.position.distanceTo(camera.position) > 100) {
+                    scene.remove(bullet);
+                    playerBullets.splice(i, 1);
+                    continue;
+                }
+
+                const bulletBox = new THREE.Box3().setFromObject(bullet);
+                for(let j = enemies.length - 1; j >= 0; j--) {
+                    const enemy = enemies[j];
+                    const enemyBox = new THREE.Box3().setFromObject(enemy);
+                    if (bulletBox.intersectsBox(enemyBox)) {
+                        enemy.health -= 25; // 4 mermide ölsün
+                        if (enemy.health <= 0) {
+                            scene.remove(enemy);
+                            enemies.splice(j, 1);
+                        }
+
+                        scene.remove(bullet);
+                        playerBullets.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
+            // Enemy bullets
+            for(let i = enemyBullets.length - 1; i >= 0; i--) {
+                const bullet = enemyBullets[i];
+                bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
+
+                if (bullet.position.distanceTo(camera.position) > 100) {
+                    scene.remove(bullet);
+                    enemyBullets.splice(i, 1);
+                    continue;
+                }
+
+                const playerBox = new THREE.Box3().setFromObject(camera);
+                const bulletBox = new THREE.Box3().setFromObject(bullet);
+                if (bulletBox.intersectsBox(playerBox)) {
+                    playerHealth -= 10;
+                    playerHealthElement.innerText = playerHealth;
+                    if (playerHealth <= 0) {
+                        showStatusMessage("OYUN BİTTİ! Yeniden oynamak için sayfayı yenileyin.", 'error');
+                        // Oyunu durdurmak için gerekli kodlar
+                        return;
+                    }
+                    scene.remove(bullet);
+                    enemyBullets.splice(i, 1);
+                }
+            }
+        }
+        
+        initGame();
     </script>
 </body>
 </html>
