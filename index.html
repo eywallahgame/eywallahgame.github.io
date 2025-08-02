@@ -2,462 +2,890 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CS2 - Counter-Strike 2 Resmi Sayfası</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Oyunlar</title>
     <style>
-        :root {
-            --primary-color: #ff6f00;
-            --secondary-color: #333;
-            --dark-bg: #1a1a1a;
-            --light-text: #f0f0f0;
-        }
-
-        body {
-            background-color: var(--dark-bg);
-            color: var(--light-text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            color: var(--primary-color) !important;
-            font-size: 1.5rem;
-        }
-
-        .navbar-nav .nav-link {
-            color: var(--light-text) !important;
-            transition: color 0.3s;
-        }
-
-        .navbar-nav .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
-
-        .header-bg {
-            background: url('https://assetsio.gnwcdn.com/counter-strike-2-cs2.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp') no-repeat center center/cover;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-        }
-
-        .header-bg::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 10;
-        }
-
-        .header-content h1 {
-            font-size: 4rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-        }
-
-        .header-content p {
-            font-size: 1.2rem;
-            margin-top: 20px;
-        }
-
-        .btn-primary-cs {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: var(--dark-bg);
-            font-weight: bold;
-            padding: 10px 30px;
-            font-size: 1.1rem;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .btn-primary-cs:hover {
-            background-color: #e66000;
-            border-color: #e66000;
-            transform: scale(1.05);
-        }
-
-        .section {
-            padding: 80px 0;
-        }
-
-        .section h2 {
-            color: var(--primary-color);
-            margin-bottom: 40px;
-            font-weight: bold;
-        }
-
-        .feature-item {
-            text-align: center;
-            padding: 20px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .feature-item:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background-color: #222;
-            border: none;
-        }
-
-        .card-img-top {
-            border-radius: 8px 8px 0 0;
-        }
-
-        /* 3D Oyun Bölümü Stilleri */
-        #game-section {
-            padding: 80px 0;
-            background-color: #1a1a1a;
-            text-align: center;
-        }
-        #game-section h2 {
-            color: var(--primary-color);
-            margin-bottom: 40px;
-            font-weight: bold;
-        }
-        #game-canvas-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: auto;
-            position: relative;
-        }
-        #game-info-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: white;
-            text-shadow: 2px 2px 4px black;
-            pointer-events: none;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.7);
-        }
-        #game-info-overlay h3 { font-size: 2rem; }
-        #game-info-overlay p { font-size: 1.2rem; }
-        
-        #joystick {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
-            display: none; /* Varsayılan olarak gizli */
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-        }
-        #joystick-handle {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.6);
-            position: relative;
-            transform: translate(0, 0);
-        }
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            border: 2px solid white;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            opacity: 0.5;
-            z-index: 200;
-        }
-        footer {
-            background-color: #111;
-            padding: 20px 0;
-            text-align: center;
+        body { margin: 0; padding: 0; overflow: hidden; font-family: Arial, sans-serif; background-color: #2c3e50; color: #ecf0f1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .game-wrapper { display: flex; flex-direction: row; justify-content: center; gap: 20px; width: 100%; height: 100%; max-height: 800px; padding: 10px; box-sizing: border-box; }
+        .game-container { position: relative; width: 50%; height: 100%; max-width: 800px; background-color: #34495e; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .game-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #fff; font-size: 1.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .score-display, .targets-left, .game-status { position: absolute; top: 10px; left: 10px; padding: 5px 10px; background-color: rgba(0,0,0,0.5); border-radius: 5px; font-size: 1.2em; z-index: 10; }
+        .game-status { bottom: 10px; top: auto; left: 50%; transform: translateX(-50%); text-align: center; display: none; }
+        #cs2-targets-left { top: 10px; right: 10px; left: auto; }
+        #gameOverText-3d { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #e74c3c; font-size: 3em; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); z-index: 10; }
+        .controls-wrapper { position: absolute; bottom: 10px; left: 10px; right: 10px; display: none; justify-content: space-between; align-items: center; z-index: 100; }
+        .button { width: 60px; height: 60px; border-radius: 50%; background-color: rgba(44, 62, 80, 0.7); color: #fff; border: none; font-size: 1.5em; line-height: 60px; text-align: center; user-select: none; }
+        .joystick-container { position: relative; width: 150px; height: 150px; background-color: rgba(44, 62, 80, 0.5); border-radius: 50%; }
+        .joystick-knob { position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; border-radius: 50%; background-color: rgba(189, 195, 199, 0.9); transform: translate(-50%, -50%); }
+        #cs2-look-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 99; }
+        #cs2-game-controls { display: none; position: absolute; bottom: 10px; left: 10px; right: 10px; justify-content: space-between; align-items: flex-end; z-index: 100; }
+        .cs2-buttons { display: flex; flex-direction: column; gap: 10px; }
+        .car-buttons { position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; z-index: 100; }
+        .car-buttons .button-group { display: flex; gap: 10px; }
+        #fullscreen-button, #pause-button { position: absolute; top: 10px; right: 10px; width: 50px; height: 50px; border-radius: 50%; background-color: rgba(44, 62, 80, 0.7); color: #fff; border: none; font-size: 1em; line-height: 50px; text-align: center; z-index: 101; }
+        @media (max-width: 768px) {
+            .game-wrapper { flex-direction: column; align-items: center; }
+            .game-container { width: 95%; height: 50%; max-height: 400px; }
         }
     </style>
 </head>
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">CS2</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#ozellikler">Özellikler</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#galeri">Galeri</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#oyun-demosu">Oyun Demosu</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="https://store.steampowered.com/app/730/CounterStrike_2/" target="_blank">Şimdi Oyna</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <header class="header-bg">
-        <div class="header-content text-white">
-            <h1 class="animate__animated animate__fadeInDown">COUNTER-STRIKE 2</h1>
-            <p class="lead mt-3 animate__animated animate__fadeInUp">Efsane geri döndü. Sınırsız aksiyona hazır ol!</p>
-            <a href="https://store.steampowered.com/app/730/CounterStrike_2/" target="_blank" class="btn btn-primary-cs btn-lg mt-4 animate__animated animate__zoomIn">Şimdi Ücretsiz Oyna</a>
-        </div>
-    </header>
-
-    <section id="ozellikler" class="section">
-        <div class="container text-center">
-            <h2 class="text-center">YENİ ÖZELLİKLER</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="feature-item">
-                        <div class="feature-icon">⚔</div>
-                        <h3>Yenilenen Haritalar</h3>
-                        <p>Favori haritalarınız, Source 2 motoru ile baştan aşağı yenilendi.</p>
-                    </div>
+    <div class="game-wrapper">
+        <div id="game-container-car" class="game-container">
+            <div class="game-info" id="car-game-info">Oynamak için Tıklayın</div>
+            <div class="score-display">Puan: <span id="score-3d">0</span></div>
+            <div id="gameOverText-3d">GAME OVER!</div>
+            <button id="fullscreen-button">Tam Ekran</button>
+            <button id="pause-button">Duraklat</button>
+            <div class="car-buttons">
+                <div class="button-group">
+                    <button id="left-button" class="button">&#8592;</button>
+                    <button id="right-button" class="button">&#8594;</button>
                 </div>
-                <div class="col-md-4">
-                    <div class="feature-item">
-                        <div class="feature-icon">🔥</div>
-                        <h3>Dinamik Sis Bombaları</h3>
-                        <p>Sis bombaları artık çevre ile etkileşime giriyor ve mermi geçişlerine göre dağılıyor.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-item">
-                        <div class="feature-icon">📦</div>
-                        <h3>Geliştirilmiş Eşyalar</h3>
-                        <p>Yeni silah modelleri, animasyonlar ve efektlerle daha gerçekçi bir deneyim.</p>
-                    </div>
+                <div class="button-group">
+                    <button id="gas-button" class="button">&#9650;</button>
+                    <button id="brake-button" class="button">&#9660;</button>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section id="galeri" class="section bg-dark">
-        <div class="container text-center">
-            <h2 class="text-center">GALERİ</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card">
-                        <img src="https://assetsio.gnwcdn.com/Counter-Strike-2-dust-2-map-a-site.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp" class="card-img-top" alt="Oyun İçi Görüntü 1">
-                    </div>
+        <div id="cs2-game-container" class="game-container">
+            <div class="game-info" id="cs2-game-info">Oynamak için Tıklayın</div>
+            <div class="score-display">Puan: <span id="cs2-score">0</span></div>
+            <div class="targets-left">Hedef: <span id="cs2-targets-left">10</span></div>
+            <div class="game-status" id="cs2-game-status"></div>
+            <div id="cs2-look-panel"></div>
+            <div id="cs2-game-controls">
+                <div id="cs2-joystick-container" class="joystick-container">
+                    <div id="cs2-joystick-knob" class="joystick-knob"></div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <img src="https://assetsio.gnwcdn.com/Counter-Strike-2-anubis-map-mid.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp" class="card-img-top" alt="Oyun İçi Görüntü 2">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <img src="https://assetsio.gnwcdn.com/Counter-Strike-2-mirage-map-mid.jpg?width=1200&height=1200&fit=bounds&quality=70&format=jpg&auto=webp" class="card-img-top" alt="Oyun İçi Görüntü 3">
-                    </div>
+                <div class="cs2-buttons">
+                    <button id="jump-button" class="button">Zıpla</button>
+                    <button id="fire-button" class="button">Ateş Et</button>
                 </div>
             </div>
         </div>
-    </section>
-
-    <section id="oyun-demosu" class="section">
-        <div class="container">
-            <h2 class="text-center">3D Oyun Demosu</h2>
-            <p class="text-center">Fare ile nişan alın ve tıklayarak ateş edin. Hareket etmek için W-A-S-D tuşlarını kullanın. Mobilde ise joystick ve ekrana dokunarak oynayın.</p>
-            <div id="game-canvas-container">
-                <div id="game-info-overlay">
-                    <h3>Oynamak için Tıklayın</h3>
-                    <p>Fare ile nişan al, W-A-S-D ile hareket et.</p>
-                    <p>Mobilde joystick kullan.</p>
-                </div>
-                
-                <div id="joystick">
-                    <div id="joystick-handle"></div>
-                </div>
-                <div id="crosshair"></div>
-            </div>
-        </div>
-    </section>
-
+    </div>
     <footer>
         <div class="container">
-            <p>© 2024 CS2. Tüm hakları saklıdır.</p>
-            <p><a href="#" class="text-white">Gizlilik Politikası</a> | <a href="#" class="text-white">Steam Sayfası</a></p>
+            <p>&copy; 2025 Eyüp Ensar Erkul. Tüm Hakları Saklıdır.</p>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.126.0/build/three.module.js';
 
-    <script>
-        const gameCanvasContainer = document.getElementById('game-canvas-container');
-        const gameInfoOverlay = document.getElementById('game-info-overlay');
-        
-        let isGameRunning = false;
+        // ARABA OYUNU KODU BURADA
+        const gameContainerCar = document.getElementById('game-container-car');
+        const scoreElement = document.getElementById('score-3d');
+        const gameOverText = document.getElementById('gameOverText-3d');
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        const pauseButton = document.getElementById('pause-button');
 
-        gameInfoOverlay.addEventListener('click', () => {
-            if (!isGameRunning) {
-                startGame();
-                gameInfoOverlay.style.display = 'none';
-            }
-        });
+        const leftButtonCar = document.getElementById('left-button');
+        const rightButtonCar = document.getElementById('right-button');
+        const gasButton = document.getElementById('gas-button');
+        const brakeButton = document.getElementById('brake-button');
 
-        function startGame() {
-            isGameRunning = true;
-            
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, gameCanvasContainer.clientWidth / gameCanvasContainer.clientHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer();
-            renderer.setSize(gameCanvasContainer.clientWidth, gameCanvasContainer.clientHeight);
-            gameCanvasContainer.appendChild(renderer.domElement);
+        let sceneCar, cameraCar, rendererCar, playerCar, gameRunning = false, score = 0, isPaused = false;
+        const otherCars = [];
+        const environmentObjects = [];
+        const roadChunks = [];
 
-            const planeGeometry = new THREE.PlaneGeometry(100, 100);
-            const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x5a5a5a, side: THREE.DoubleSide });
-            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-            plane.rotation.x = Math.PI / 2;
-            scene.add(plane);
+        let playerSpeed = 0.15;
+        let targetSpeed = 0.15;
+        const maxSpeed = 0.3;
+        const minSpeed = 0.08;
 
-            const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
-            const playerMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            const player = new THREE.Mesh(playerGeometry, playerMaterial);
-            player.position.y = 1;
-            scene.add(player);
+        let lateralVelocity = 0;
+        let lateralAcceleration = 0.005;
+        const maxLateralAcceleration = 0.01;
+        let maxLateralSpeed = 0.05;
+        const maxMaxLateralSpeed = 0.1;
 
-            camera.position.z = 5;
-            camera.position.y = 10;
-            camera.lookAt(player.position);
+        const roadWidth = 6.3;
+        const playerXMin = -(roadWidth / 2) + 0.5;
+        const playerXMax = (roadWidth / 2) - 0.5;
 
-            const moveSpeed = 0.05;
-            const keys = {};
-            let isMobile = /Mobi|Android/i.test(navigator.userAgent);
-            
-            const joystick = document.getElementById('joystick');
-            const joystickHandle = document.getElementById('joystick-handle');
-            let isJoystickActive = false;
-            let joystickVector = new THREE.Vector2();
+        const spawnDistance = 50;
+        const despawnDistance = 10;
 
-            if (isMobile) {
-                joystick.style.display = 'flex';
-            } else {
-                joystick.style.display = 'none';
-            }
-            
-            joystick.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                isJoystickActive = true;
-            }, { passive: false });
-            
-            joystick.addEventListener('touchmove', (e) => {
-                if (!isJoystickActive) return;
-                const touch = e.touches[0];
-                const rect = joystick.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                let dx = touch.clientX - centerX;
-                let dy = touch.clientY - centerY;
-                const distance = Math.hypot(dx, dy);
-                const maxDistance = rect.width / 2;
-                if (distance > maxDistance) {
-                    const angle = Math.atan2(dy, dx);
-                    dx = Math.cos(angle) * maxDistance;
-                    dy = Math.sin(angle) * maxDistance;
-                }
-                joystickHandle.style.transform = `translate(${dx}px, ${dy}px)`;
-                joystickVector.set(dx / maxDistance, -dy / maxDistance).normalize();
-            }, { passive: false });
+        const roadChunkSize = 100;
 
-            joystick.addEventListener('touchend', () => {
-                isJoystickActive = false;
-                joystickHandle.style.transform = 'translate(0, 0)';
-                joystickVector.set(0, 0);
-            });
+        const defaultCameraFov = 90;
+        const defaultCameraPosition = new THREE.Vector3(0, 3, 10);
+        const pauseCameraFov = 110;
+        const pauseCameraPosition = new THREE.Vector3(0, 5, 12);
 
-            document.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
-            document.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+        function initCarGame() {
+            sceneCar = new THREE.Scene();
+            sceneCar.background = new THREE.Color(0x87ceeb);
 
-            document.addEventListener('click', (e) => {
-                if (isGameRunning) shoot();
-            });
-            
-            document.addEventListener('touchstart', (e) => {
-                if (isGameRunning && !joystick.contains(e.target)) {
-                     shoot();
-                }
-            });
+            cameraCar = new THREE.PerspectiveCamera(defaultCameraFov, gameContainerCar.clientWidth / gameContainerCar.clientHeight, 0.1, 1000);
+            cameraCar.position.copy(defaultCameraPosition);
+            cameraCar.rotation.x = -Math.PI / 8;
 
-            function shoot() {
-                const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-                const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-                const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-                bullet.position.copy(player.position);
-                scene.add(bullet);
-                const direction = new THREE.Vector3();
-                camera.getWorldDirection(direction); 
-                bullet.velocity = direction.multiplyScalar(0.5);
-                setTimeout(() => {
-                    scene.remove(bullet);
-                }, 2000);
-            }
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            sceneCar.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(0, 10, 5);
+            sceneCar.add(directionalLight);
 
-            function animate() {
-                if (!isGameRunning) return;
-                requestAnimationFrame(animate);
+            playerCar = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 1), new THREE.MeshLambertMaterial({ color: 0x27ae60 }));
+            playerCar.position.set(0, 0.25, 4);
+            sceneCar.add(playerCar);
 
-                if (isMobile && isJoystickActive) {
-                    player.position.x += joystickVector.x * moveSpeed * 2;
-                    player.position.z += joystickVector.y * moveSpeed * 2;
-                } else {
-                    if (keys['w']) player.position.z -= moveSpeed;
-                    if (keys['s']) player.position.z += moveSpeed;
-                    if (keys['a']) player.position.x -= moveSpeed;
-                    if (keys['d']) player.position.x += moveSpeed;
-                }
-                
-                scene.children.forEach(child => {
-                    if (child.velocity) {
-                        child.position.add(child.velocity);
-                    }
-                });
+            rendererCar = new THREE.WebGLRenderer({ antialias: true });
+            rendererCar.setSize(gameContainerCar.clientWidth, gameContainerCar.clientHeight);
+            rendererCar.setPixelRatio(window.devicePixelRatio);
+            gameContainerCar.appendChild(rendererCar.domElement);
 
-                renderer.render(scene, camera);
-            }
+            createInitialRoad();
+            spawnInitialCars();
+            spawnInitialEnvironmentObjects();
 
-            animate();
+            document.addEventListener('keydown', onKeyDownCar);
+            document.addEventListener('keyup', onKeyUpCar);
+            window.addEventListener('resize', onResizeCar);
+            gameContainerCar.addEventListener('click', startGameCar);
+
+            leftButtonCar.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('left'); });
+            rightButtonCar.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('right'); });
+            gasButton.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('gas'); });
+            brakeButton.addEventListener('touchstart', (e) => { e.preventDefault(); onButtonPressCar('brake'); });
+
+            leftButtonCar.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('left'); });
+            rightButtonCar.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('right'); });
+            gasButton.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('gas'); });
+            brakeButton.addEventListener('touchend', (e) => { e.preventDefault(); onButtonReleaseCar('brake'); });
+
+            leftButtonCar.addEventListener('mousedown', () => onButtonPressCar('left'));
+            leftButtonCar.addEventListener('mouseup', () => onButtonReleaseCar('left'));
+            leftButtonCar.addEventListener('mouseout', () => onButtonReleaseCar('left'));
+            rightButtonCar.addEventListener('mousedown', () => onButtonPressCar('right'));
+            rightButtonCar.addEventListener('mouseup', () => onButtonReleaseCar('right'));
+            rightButtonCar.addEventListener('mouseout', () => onButtonReleaseCar('right'));
+            gasButton.addEventListener('mousedown', () => onButtonPressCar('gas'));
+            gasButton.addEventListener('mouseup', () => onButtonReleaseCar('gas'));
+            gasButton.addEventListener('mouseout', () => onButtonReleaseCar('gas'));
+            brakeButton.addEventListener('mousedown', () => onButtonPressCar('brake'));
+            brakeButton.addEventListener('mouseup', () => onButtonReleaseCar('brake'));
+            brakeButton.addEventListener('mouseout', () => onButtonReleaseCar('brake'));
+
+            fullscreenButton.addEventListener('click', toggleFullscreenCar);
+            pauseButton.addEventListener('click', togglePauseCar);
+
+            animateCarGame();
         }
+
+        function createRoadChunk(positionZ) {
+            const chunk = new THREE.Group();
+            const roadGeometry = new THREE.BoxGeometry(roadWidth, 0.1, roadChunkSize);
+            const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x4a6566 });
+            const roadMesh = new THREE.Mesh(roadGeometry, roadMaterial);
+            roadMesh.position.z = positionZ;
+            chunk.add(roadMesh);
+            const lineGeometry = new THREE.BoxGeometry(0.1, 0.1, 1);
+            const lineMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+            for (let i = positionZ - roadChunkSize / 2; i < positionZ + roadChunkSize / 2; i += 2) {
+                const line1 = new THREE.Mesh(lineGeometry, lineMaterial);
+                line1.position.set(-2.1, 0.06, i);
+                chunk.add(line1);
+                const line2 = new THREE.Mesh(lineGeometry, lineMaterial);
+                line2.position.set(-0.7, 0.06, i);
+                chunk.add(line2);
+                const line3 = new THREE.Mesh(lineGeometry, lineMaterial);
+                line3.position.set(0.7, 0.06, i);
+                chunk.add(line3);
+                const line4 = new THREE.Mesh(lineGeometry, lineMaterial);
+                line4.position.set(2.1, 0.06, i);
+                chunk.add(line4);
+            }
+            return chunk;
+        }
+
+        function createInitialRoad() {
+            for(let i = -3; i < 3; i++) {
+                const chunk = createRoadChunk(i * roadChunkSize);
+                sceneCar.add(chunk);
+                roadChunks.push(chunk);
+            }
+        }
+
+        function createBillboardTexture(text) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const context = canvas.getContext('2d');
+            context.fillStyle = '#2c3e50';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.font = 'bold 48px Arial';
+            context.fillStyle = '#1abc9c';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, canvas.width / 2, canvas.height / 2);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createTree() {
+            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+            const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8b4513 });
+            const leafGeometry = new THREE.ConeGeometry(1, 2, 8);
+            const leafMaterial = new THREE.MeshLambertMaterial({ color: 0x228b22 });
+            const baseGeometry = new THREE.BoxGeometry(2, 0.1, 2);
+            const baseMaterial = new THREE.MeshLambertMaterial({ color: 0x228b22 });
+
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            const leaves = new THREE.Mesh(leafGeometry, leafMaterial);
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+
+            leaves.position.y = 1.5;
+            trunk.position.y = 1;
+            base.position.y = 0.05;
+
+            const tree = new THREE.Group();
+            tree.add(trunk);
+            tree.add(leaves);
+            tree.add(base);
+            return tree;
+        }
+
+        function createBillboard() {
+            const billboardGeometry = new THREE.BoxGeometry(4, 2, 0.2);
+            const billboardTexture = createBillboardTexture('Eyvallah Turkish Restaurant');
+            const billboardMaterial = new THREE.MeshBasicMaterial({ map: billboardTexture });
+            const billboardMesh = new THREE.Mesh(billboardGeometry, billboardMaterial);
+            billboardMesh.position.y = 2;
+            return billboardMesh;
+        }
+
+        function spawnInitialCars() {
+            for (let i = 0; i < 20; i++) {
+                spawnNewCar();
+            }
+        }
+
+        function spawnNewCar() {
+            const car = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 1), new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }));
+            const laneIndex = (Math.floor(Math.random() * 6) - 2.5) * 1.4;
+            const zPosition = cameraCar.position.z - spawnDistance - Math.random() * 50;
+            car.position.set(laneIndex, 0.25, zPosition);
+            car.speed = (Math.random() * 0.1) + 0.05;
+            sceneCar.add(car);
+            otherCars.push(car);
+        }
+
+        function spawnInitialEnvironmentObjects() {
+            for (let i = 0; i < 50; i++) {
+                spawnNewEnvironmentObject();
+            }
+        }
+
+        function spawnNewEnvironmentObject() {
+            let obj;
+            if (Math.random() > 0.9) {
+                obj = createBillboard();
+                obj.position.x = (Math.random() > 0.5 ? 1 : -1) * (roadWidth / 2 + 3);
+            } else {
+                obj = createTree();
+                obj.position.x = (Math.random() > 0.5 ? 1 : -1) * (roadWidth / 2 + 1 + Math.random() * 5);
+            }
+            obj.position.z = cameraCar.position.z - spawnDistance - Math.random() * 100;
+            sceneCar.add(obj);
+            environmentObjects.push(obj);
+        }
+
+        function startGameCar() {
+            if (gameRunning) return;
+            gameRunning = true;
+            score = 0;
+            playerSpeed = 0.15;
+            targetSpeed = 0.15;
+            lateralAcceleration = 0.005;
+            maxLateralSpeed = 0.05;
+            gameOverText.style.display = 'none';
+            pauseButton.innerText = 'Duraklat';
+            isPaused = false;
+
+            otherCars.forEach(car => {
+                car.position.z = cameraCar.position.z - spawnDistance - Math.random() * 50;
+                car.speed = (Math.random() * 0.1) + 0.05;
+            });
+
+            environmentObjects.forEach(obj => {
+                obj.position.z = cameraCar.position.z - spawnDistance - Math.random() * 100;
+            });
+
+            animateCarGame();
+        }
+
+        function togglePauseCar() {
+            if (!gameRunning) return;
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseButton.innerText = 'Devam Et';
+                cameraCar.fov = pauseCameraFov;
+                cameraCar.position.copy(pauseCameraPosition);
+                cameraCar.updateProjectionMatrix();
+            } else {
+                pauseButton.innerText = 'Duraklat';
+                cameraCar.fov = defaultCameraFov;
+                cameraCar.position.copy(defaultCameraPosition);
+                cameraCar.updateProjectionMatrix();
+                animateCarGame();
+            }
+        }
+
+        function onKeyDownCar(event) {
+            if (!gameRunning) return;
+            if (event.key === 'p' || event.key === 'P') {
+                togglePauseCar();
+            }
+            if (isPaused) return;
+
+            if (event.key === 'ArrowLeft') {
+                lateralVelocity = -maxLateralSpeed;
+            } else if (event.key === 'ArrowRight') {
+                lateralVelocity = maxLateralSpeed;
+            } else if (event.key === 'ArrowUp') {
+                targetSpeed = maxSpeed;
+            } else if (event.key === 'ArrowDown') {
+                targetSpeed = minSpeed;
+            }
+        }
+
+        function onKeyUpCar(event) {
+            if (!gameRunning || isPaused) return;
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                lateralVelocity = 0;
+            } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                targetSpeed = playerSpeed;
+            }
+        }
+
+        function onButtonPressCar(direction) {
+            if (!gameRunning || isPaused) return;
+            if (direction === 'left') {
+                lateralVelocity = -maxLateralSpeed;
+            } else if (direction === 'right') {
+                lateralVelocity = maxLateralSpeed;
+            } else if (direction === 'gas') {
+                targetSpeed = maxSpeed;
+            } else if (direction === 'brake') {
+                targetSpeed = minSpeed;
+            }
+        }
+
+        function onButtonReleaseCar(direction) {
+            if (!gameRunning || isPaused) return;
+            if (direction === 'left' || direction === 'right') {
+                lateralVelocity = 0;
+            } else if (direction === 'gas' || direction === 'brake') {
+                targetSpeed = playerSpeed;
+            }
+        }
+
+        function updateCarGame() {
+            if (!gameRunning || isPaused) return;
+
+            playerSpeed += (targetSpeed - playerSpeed) * 0.05;
+
+            lateralAcceleration = Math.min(lateralAcceleration + 0.000005, maxLateralAcceleration);
+            maxLateralSpeed = Math.min(maxLateralSpeed + 0.000005, maxMaxLateralSpeed);
+
+            playerCar.position.x += lateralVelocity;
+            playerCar.position.x = Math.max(playerXMin, Math.min(playerXMax, playerCar.position.x));
+
+            const moveDistance = playerSpeed;
+
+            roadChunks.forEach(chunk => {
+                chunk.position.z += moveDistance;
+                if(chunk.position.z > cameraCar.position.z + despawnDistance + roadChunkSize / 2) {
+                    chunk.position.z -= roadChunks.length * roadChunkSize;
+                }
+            });
+
+            otherCars.forEach((car, index) => {
+                const relativeSpeed = moveDistance - car.speed;
+                car.position.z += relativeSpeed;
+
+                if (car.position.z > cameraCar.position.z + despawnDistance) {
+                    sceneCar.remove(car);
+                    otherCars.splice(index, 1);
+                    spawnNewCar();
+                }
+            });
+
+            environmentObjects.forEach((obj, index) => {
+                obj.position.z += moveDistance;
+                if (obj.position.z > cameraCar.position.z + despawnDistance) {
+                    sceneCar.remove(obj);
+                    environmentObjects.splice(index, 1);
+                    spawnNewEnvironmentObject();
+                }
+            });
+
+            checkCollisions();
+
+            score += moveDistance * 10;
+            scoreElement.innerText = Math.floor(score);
+        }
+
+        function checkCollisions() {
+            const playerBox = new THREE.Box3().setFromObject(playerCar);
+            otherCars.forEach(car => {
+                const carBox = new THREE.Box3().setFromObject(car);
+                if (playerBox.intersectsBox(carBox)) {
+                    gameRunning = false;
+                    gameOverText.style.display = 'block';
+                }
+            });
+        }
+
+        function onResizeCar() {
+            cameraCar.aspect = gameContainerCar.clientWidth / gameContainerCar.clientHeight;
+            cameraCar.updateProjectionMatrix();
+            rendererCar.setSize(gameContainerCar.clientWidth, gameContainerCar.clientHeight);
+        }
+
+        function toggleFullscreenCar() {
+            if (!document.fullscreenElement) {
+                gameContainerCar.requestFullscreen().catch(err => {
+                    alert(`Tam ekran moduna geçilemedi: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function animateCarGame() {
+            if (gameRunning && !isPaused) {
+                requestAnimationFrame(animateCarGame);
+                updateCarGame();
+                rendererCar.render(sceneCar, cameraCar);
+            }
+        }
+
+        initCarGame();
+
+        // CS2 BENZERİ OYUN KODU BURADA
+        const gameContainerCS2 = document.getElementById('cs2-game-container');
+        const infoCS2 = document.getElementById('cs2-game-info');
+        const targetsLeftElement = document.getElementById('cs2-targets-left');
+        const scoreCS2Element = document.getElementById('cs2-score');
+        const gameStatusElement = document.getElementById('cs2-game-status');
+
+        const cs2Controls = document.getElementById('cs2-game-controls');
+        const moveJoystickContainer = document.getElementById('cs2-joystick-container');
+        const fireButton = document.getElementById('fire-button');
+        const jumpButton = document.getElementById('jump-button');
+        const lookPanel = document.getElementById('cs2-look-panel');
+
+        let sceneCS2, cameraCS2, rendererCS2;
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        let velocityCS2 = new THREE.Vector3();
+        let directionCS2 = new THREE.Vector3();
+        let canJump = false;
+        let targets = [];
+        let bullets = [];
+        let scoreCS2 = 0;
+        let targetCount = 10;
+
+        const playerHeight = 1.8;
+        const playerSpeedCS2 = 0.05;
+
+        // Joystick için değişkenler
+        let moveJoystickActive = false;
+        let moveJoystickCenter = { x: 0, y: 0 };
+        let moveJoystickPos = { x: 0, y: 0 };
+        const moveJoystickRadius = 75;
+
+        // Look Panel için değişkenler
+        let lookTouchIdentifier = null;
+        let prevTouchX = 0;
+        let prevTouchY = 0;
+        const lookSensitivity = 0.005;
+
+        function initCS2Game() {
+            sceneCS2 = new THREE.Scene();
+            sceneCS2.background = new THREE.Color(0x87ceeb);
+            sceneCS2.fog = new THREE.Fog(0x87ceeb, 0, 750);
+
+            cameraCS2 = new THREE.PerspectiveCamera(75, gameContainerCS2.clientWidth / gameContainerCS2.clientHeight, 0.1, 1000);
+            cameraCS2.position.y = playerHeight;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            sceneCS2.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            sceneCS2.add(directionalLight);
+
+            const groundGeometry = new THREE.PlaneGeometry(500, 500);
+            const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.1;
+            sceneCS2.add(ground);
+
+            rendererCS2 = new THREE.WebGLRenderer({ antialias: true });
+            rendererCS2.setSize(gameContainerCS2.clientWidth, gameContainerCS2.clientHeight);
+            rendererCS2.setPixelRatio(window.devicePixelRatio);
+            gameContainerCS2.appendChild(rendererCS2.domElement);
+
+            createWalls();
+            spawnTargets();
+
+            gameContainerCS2.addEventListener('mousedown', onMouseDownCS2, false);
+            gameContainerCS2.addEventListener('click', () => {
+                if (isMobileDevice()) {
+                    toggleFullscreenCS2();
+                } else {
+                    if (document.pointerLockElement !== rendererCS2.domElement) {
+                        rendererCS2.domElement.requestPointerLock();
+                        infoCS2.style.display = 'none';
+                        gameStatusElement.innerText = "Oyun başladı! Tüm hedefleri vur.";
+                        gameStatusElement.style.display = 'block';
+                    }
+                }
+            });
+
+            document.addEventListener('keydown', onKeyDownCS2, false);
+            document.addEventListener('keyup', onKeyUpCS2, false);
+            document.addEventListener('pointerlockchange', onPointerlockChange, false);
+
+            if (isMobileDevice()) {
+                infoCS2.style.display = 'none';
+                cs2Controls.style.display = 'flex';
+                lookPanel.addEventListener('touchstart', onLookStart, false);
+                lookPanel.addEventListener('touchmove', onLookMove, false);
+                lookPanel.addEventListener('touchend', onLookEnd, false);
+            } else {
+                infoCS2.style.display = 'block';
+                cs2Controls.style.display = 'none';
+                lookPanel.style.display = 'none';
+            }
+
+            moveJoystickContainer.addEventListener('touchstart', onMoveJoystickStart, false);
+            moveJoystickContainer.addEventListener('touchmove', onMoveJoystickMove, false);
+            moveJoystickContainer.addEventListener('touchend', onMoveJoystickEnd, false);
+
+            fireButton.addEventListener('touchstart', (e) => { e.preventDefault(); onFireCS2(); });
+            jumpButton.addEventListener('touchstart', () => {
+                if(canJump) velocityCS2.y = 10;
+                canJump = false;
+            });
+
+            window.addEventListener('resize', onResizeCS2);
+            window.addEventListener('orientationchange', onOrientationChange);
+
+            animateCS2();
+        }
+
+        function isMobileDevice() {
+            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+        }
+
+        function onPointerlockChange() {
+            if (document.pointerLockElement === rendererCS2.domElement) {
+                document.addEventListener('mousemove', onMouseMoveCS2, false);
+                infoCS2.style.display = 'none';
+                gameStatusElement.innerText = "Oyun başladı! Tüm hedefleri vur.";
+                gameStatusElement.style.display = 'block';
+            } else {
+                document.removeEventListener('mousemove', onMouseMoveCS2, false);
+                infoCS2.style.display = 'block';
+                gameStatusElement.style.display = 'none';
+            }
+        }
+
+        function toggleFullscreenCS2() {
+            if (!document.fullscreenElement) {
+                gameContainerCS2.requestFullscreen().catch(err => {
+                    console.log(`Tam ekran moduna geçilemedi: ${err.message}`);
+                });
+                screen.orientation.lock('landscape').catch(err => {
+                    console.log(`Yatay moda geçilemedi: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+                screen.orientation.unlock();
+            }
+        }
+
+        function onOrientationChange() {
+             if (window.orientation === 90 || window.orientation === -90) {
+                if (isMobileDevice()) {
+                    toggleFullscreenCS2();
+                }
+            }
+        }
+
+        function onResizeCS2() {
+            cameraCS2.aspect = gameContainerCS2.clientWidth / gameContainerCS2.clientHeight;
+            cameraCS2.updateProjectionMatrix();
+            rendererCS2.setSize(gameContainerCS2.clientWidth, gameContainerCS2.clientHeight);
+        }
+
+        function createWalls() {
+            const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xcccccc });
+            const walls = [
+                new THREE.Mesh(new THREE.BoxGeometry(20, 5, 1), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(1, 5, 20), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(30, 5, 1), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(1, 5, 15), wallMaterial)
+            ];
+            walls[0].position.set(0, 2.5, -20);
+            walls[1].position.set(15, 2.5, 0);
+            walls[2].position.set(-10, 2.5, 20);
+            walls[3].position.set(-20, 2.5, 0);
+
+            walls.forEach(wall => sceneCS2.add(wall));
+        }
+
+        function spawnTargets() {
+            targets.forEach(target => sceneCS2.remove(target));
+            targets = [];
+            for (let i = 0; i < targetCount; i++) {
+                const targetGeometry = new THREE.BoxGeometry(1, 1, 1);
+                const targetMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+                const targetMesh = new THREE.Mesh(targetGeometry, targetMaterial);
+
+                const x = (Math.random() - 0.5) * 40;
+                const z = (Math.random() - 0.5) * 40;
+                const y = Math.random() * 3 + 1;
+
+                targetMesh.position.set(x, y, z);
+                sceneCS2.add(targetMesh);
+                targets.push(targetMesh);
+            }
+            targetsLeftElement.innerText = targets.length;
+        }
+
+        function onKeyDownCS2(event) {
+            switch (event.code) {
+                case 'KeyW': moveForward = true; break;
+                case 'KeyA': moveLeft = true; break;
+                case 'KeyS': moveBackward = true; break;
+                case 'KeyD': moveRight = true; break;
+                case 'Space':
+                    if (canJump) velocityCS2.y = 10;
+                    canJump = false;
+                    break;
+                case 'Escape':
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                        screen.orientation.unlock();
+                    }
+                    break;
+            }
+        }
+
+        function onKeyUpCS2(event) {
+            switch (event.code) {
+                case 'KeyW': moveForward = false; break;
+                case 'KeyA': moveLeft = false; break;
+                case 'KeyS': moveBackward = false; break;
+                case 'KeyD': moveRight = false; break;
+            }
+        }
+
+        function onMouseMoveCS2(event) {
+            if (document.pointerLockElement === rendererCS2.domElement) {
+                const movementX = event.movementX || 0;
+                const movementY = event.movementY || 0;
+
+                cameraCS2.rotation.y -= movementX * lookSensitivity;
+                const newRotationX = cameraCS2.rotation.x - movementY * lookSensitivity;
+                cameraCS2.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, newRotationX));
+            }
+        }
+
+        function onMouseDownCS2(event) {
+            if (document.pointerLockElement === rendererCS2.domElement) {
+                if (event.button === 0) {
+                    onFireCS2();
+                }
+            }
+        }
+
+        function onFireCS2() {
+            const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+            const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+
+            bullet.position.copy(cameraCS2.position);
+            const direction = new THREE.Vector3();
+            cameraCS2.getWorldDirection(direction);
+
+            bullet.velocity = direction.multiplyScalar(50);
+            sceneCS2.add(bullet);
+            bullets.push(bullet);
+        }
+
+        function updateBullets() {
+            for(let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
+
+                if (bullet.position.distanceTo(cameraCS2.position) > 100) {
+                    sceneCS2.remove(bullet);
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                const bulletBox = new THREE.Box3().setFromObject(bullet);
+                let hitTarget = false;
+
+                for(let j = targets.length - 1; j >= 0; j--) {
+                    const target = targets[j];
+                    const targetBox = new THREE.Box3().setFromObject(target);
+
+                    if (bulletBox.intersectsBox(targetBox)) {
+                        sceneCS2.remove(target);
+                        targets.splice(j, 1);
+
+                        scoreCS2 += 100;
+                        scoreCS2Element.innerText = scoreCS2;
+                        targetsLeftElement.innerText = targets.length;
+
+                        sceneCS2.remove(bullet);
+                        bullets.splice(i, 1);
+
+                        hitTarget = true;
+                        break;
+                    }
+                }
+
+                if (targets.length === 0) {
+                    gameStatusElement.innerText = "Tebrikler! Tüm hedefleri vurdun. Yeni bir oyun için sayfayı yenile.";
+                    gameStatusElement.style.color = 'green';
+                }
+            }
+        }
+
+        function onMoveJoystickStart(e) {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            const rect = moveJoystickContainer.getBoundingClientRect();
+            moveJoystickActive = touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+
+            if (moveJoystickActive) {
+                moveJoystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                onMoveJoystickMove(e);
+            }
+        }
+
+        function onMoveJoystickMove(e) {
+            if (!moveJoystickActive) return;
+            e.preventDefault();
+            const touch = Array.from(e.changedTouches).find(t => {
+                const rect = moveJoystickContainer.getBoundingClientRect();
+                return t.clientX >= rect.left && t.clientX <= rect.right && t.clientY >= rect.top && t.clientY <= rect.bottom;
+            });
+            if (!touch) return;
+
+            let dx = touch.clientX - moveJoystickCenter.x;
+            let dy = touch.clientY - moveJoystickCenter.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > moveJoystickRadius) {
+                const angle = Math.atan2(dy, dx);
+                dx = Math.cos(angle) * moveJoystickRadius;
+                dy = Math.sin(angle) * moveJoystickRadius;
+            }
+
+            document.getElementById('cs2-joystick-knob').style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
+
+            moveJoystickPos = { x: dx / moveJoystickRadius, y: -dy / moveJoystickRadius };
+        }
+
+        function onMoveJoystickEnd(e) {
+            if (!moveJoystickActive) return;
+            moveJoystickActive = false;
+            document.getElementById('cs2-joystick-knob').style.transform = 'translate(-50%, -50%)';
+            moveJoystickPos = { x: 0, y: 0 };
+        }
+
+        function onLookStart(e) {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            lookTouchIdentifier = touch.identifier;
+            prevTouchX = touch.clientX;
+            prevTouchY = touch.clientY;
+        }
+
+        function onLookMove(e) {
+            if (lookTouchIdentifier === null) return;
+            e.preventDefault();
+            const touch = Array.from(e.changedTouches).find(t => t.identifier === lookTouchIdentifier);
+            if (!touch) return;
+
+            const dx = touch.clientX - prevTouchX;
+            const dy = touch.clientY - prevTouchY;
+
+            cameraCS2.rotation.y -= dx * lookSensitivity;
+            const newRotationX = cameraCS2.rotation.x - dy * lookSensitivity;
+            cameraCS2.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, newRotationX));
+
+            prevTouchX = touch.clientX;
+            prevTouchY = touch.clientY;
+        }
+
+        function onLookEnd(e) {
+            if (lookTouchIdentifier === null) return;
+            e.preventDefault();
+            lookTouchIdentifier = null;
+        }
+
+        function animateCS2() {
+            requestAnimationFrame(animateCS2);
+
+            const delta = 0.016;
+
+            velocityCS2.y -= 9.8 * 2.0 * delta;
+
+            if (isMobileDevice()) {
+                directionCS2.z = moveJoystickPos.y;
+                directionCS2.x = moveJoystickPos.x;
+            } else {
+                directionCS2.z = Number(moveForward) - Number(moveBackward);
+                directionCS2.x = Number(moveRight) - Number(moveLeft);
+            }
+
+            if (directionCS2.length() > 0) {
+                directionCS2.normalize();
+            }
+
+            const forwardVector = new THREE.Vector3();
+            cameraCS2.getWorldDirection(forwardVector);
+            forwardVector.y = 0;
+            forwardVector.normalize();
+
+            const rightVector = new THREE.Vector3();
+            rightVector.crossVectors(cameraCS2.up, forwardVector);
+            rightVector.normalize();
+
+            const movement = new THREE.Vector3();
+            movement.add(forwardVector.multiplyScalar(directionCS2.z * playerSpeedCS2 * 60 * delta));
+            movement.add(rightVector.multiplyScalar(directionCS2.x * playerSpeedCS2 * 60 * delta));
+
+            cameraCS2.position.add(movement);
+            cameraCS2.position.y += velocityCS2.y * delta;
+
+            if (cameraCS2.position.y <= playerHeight) {
+                velocityCS2.y = 0;
+                cameraCS2.position.y = playerHeight;
+                canJump = true;
+            }
+
+            updateBullets();
+            rendererCS2.render(sceneCS2, cameraCS2);
+        }
+
+        initCS2Game();
     </script>
 </body>
 </html>
