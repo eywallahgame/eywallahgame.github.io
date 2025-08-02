@@ -18,10 +18,36 @@
         .joystick-knob { position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; border-radius: 50%; background-color: rgba(189, 195, 199, 0.9); transform: translate(-50%, -50%); }
         .cs2-buttons { display: flex; flex-direction: column; gap: 10px; }
         .reload-button { width: 60px; height: 60px; border-radius: 50%; background-color: rgba(230, 126, 34, 0.7); color: #fff; border: none; font-size: 1.2em; line-height: 60px; text-align: center; user-select: none; }
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        #crosshair::before, #crosshair::after {
+            content: '';
+            position: absolute;
+            background-color: white;
+        }
+        #crosshair::before {
+            width: 2px;
+            height: 20px;
+            left: 9px;
+        }
+        #crosshair::after {
+            width: 20px;
+            height: 2px;
+            top: 9px;
+        }
     </style>
 </head>
 <body>
     <div id="eyvallah-strike-container" class="game-container">
+        <div id="crosshair"></div>
         <div class="ui-panel">
             <div class="health-display">Can: <span id="player-health">100</span></div>
             <div class="ammo-display"><span id="current-ammo">30</span> / <span id="max-ammo">30</span></div>
@@ -60,9 +86,11 @@
         const jumpButton = document.getElementById('jump-button');
         const reloadButton = document.getElementById('reload-button');
         const lookPanel = document.getElementById('cs2-look-panel');
+        const crosshair = document.getElementById('crosshair');
 
         let scene, camera, renderer;
         let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        let turnLeft = false, turnRight = false;
         let velocity = new THREE.Vector3();
         let direction = new THREE.Vector3();
         let canJump = false;
@@ -72,11 +100,21 @@
 
         const playerHeight = 1.8;
         const playerSpeed = 0.05;
+        const turnSpeed = 0.03;
         let playerHealth = 100;
         let currentAmmo = 30;
         const maxAmmo = 30;
         const reloadTime = 2000;
         let isReloading = false;
+        const maxEnemies = 10;
+        const mapSize = 100;
+        const spawnPoints = [
+            new THREE.Vector3(30, 0.9, 30),
+            new THREE.Vector3(-30, 0.9, 30),
+            new THREE.Vector3(30, 0.9, -30),
+            new THREE.Vector3(-30, 0.9, -30),
+            new THREE.Vector3(0, 0.9, 0)
+        ];
 
         let moveJoystickActive = false;
         let moveJoystickCenter = { x: 0, y: 0 };
@@ -102,7 +140,7 @@
             directionalLight.position.set(10, 20, 10);
             scene.add(directionalLight);
 
-            const groundGeometry = new THREE.PlaneGeometry(500, 500);
+            const groundGeometry = new THREE.PlaneGeometry(mapSize, mapSize);
             const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
             const ground = new THREE.Mesh(groundGeometry, groundMaterial);
             ground.rotation.x = -Math.PI / 2;
@@ -114,13 +152,12 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             gameContainer.appendChild(renderer.domElement);
             
-            // Set initial UI
             playerHealthElement.innerText = playerHealth;
             currentAmmoElement.innerText = currentAmmo;
             maxAmmoElement.innerText = maxAmmo;
 
             createWalls();
-            spawnEnemies();
+            spawnInitialEnemies();
 
             document.addEventListener('keydown', onKeyDown, false);
             document.addEventListener('keyup', onKeyUp, false);
@@ -136,9 +173,11 @@
                 fireButton.addEventListener('touchstart', (e) => { e.preventDefault(); onFire(); });
                 jumpButton.addEventListener('touchstart', () => { if(canJump) velocity.y = 10; canJump = false; });
                 reloadButton.addEventListener('touchstart', onReload);
+                crosshair.style.display = 'none';
             } else {
                 cs2Controls.style.display = 'none';
                 lookPanel.style.display = 'none';
+                crosshair.style.display = 'block';
             }
 
             moveJoystickContainer.addEventListener('touchstart', onMoveJoystickStart, false);
@@ -175,9 +214,11 @@
             if (document.pointerLockElement === gameContainer) {
                 document.addEventListener('mousemove', onMouseMove, false);
                 gameStatusElement.style.display = 'none';
+                crosshair.style.display = 'block';
             } else {
                 document.removeEventListener('mousemove', onMouseMove, false);
                 showStatusMessage("Oyun Duraklatıldı. Devam etmek için tıklayın.", 'info');
+                crosshair.style.display = 'none';
             }
         }
 
@@ -189,16 +230,18 @@
 
         function createWalls() {
             const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xcccccc });
+            const wallHeight = 5;
+            const wallDepth = 1;
             const walls = [
-                new THREE.Mesh(new THREE.BoxGeometry(20, 5, 1), wallMaterial),
-                new THREE.Mesh(new THREE.BoxGeometry(1, 5, 20), wallMaterial),
-                new THREE.Mesh(new THREE.BoxGeometry(30, 5, 1), wallMaterial),
-                new THREE.Mesh(new THREE.BoxGeometry(1, 5, 15), wallMaterial)
+                new THREE.Mesh(new THREE.BoxGeometry(mapSize, wallHeight, wallDepth), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(mapSize, wallHeight, wallDepth), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(wallDepth, wallHeight, mapSize), wallMaterial),
+                new THREE.Mesh(new THREE.BoxGeometry(wallDepth, wallHeight, mapSize), wallMaterial)
             ];
-            walls[0].position.set(0, 2.5, -20);
-            walls[1].position.set(15, 2.5, 0);
-            walls[2].position.set(-10, 2.5, 20);
-            walls[3].position.set(-20, 2.5, 0);
+            walls[0].position.set(0, wallHeight/2, -mapSize/2);
+            walls[1].position.set(0, wallHeight/2, mapSize/2);
+            walls[2].position.set(-mapSize/2, wallHeight/2, 0);
+            walls[3].position.set(mapSize/2, wallHeight/2, 0);
 
             walls.forEach(wall => scene.add(wall));
         }
@@ -219,29 +262,36 @@
             bot.health = 100;
             bot.lastFireTime = Date.now();
             bot.fireRate = Math.random() * 2000 + 1000;
+            bot.movementSpeed = Math.random() * 0.03 + 0.01;
+            bot.targetPosition = new THREE.Vector3();
+            bot.newTargetTime = Date.now();
             
             return bot;
         }
 
-        function spawnEnemies() {
-            enemies.forEach(enemy => scene.remove(enemy));
-            enemies = [];
-            for (let i = 0; i < 5; i++) {
-                const enemy = createEnemyBot();
-                const x = (Math.random() - 0.5) * 40;
-                const z = (Math.random() - 0.5) * 40;
-                enemy.position.set(x, 0.9, z);
-                scene.add(enemy);
-                enemies.push(enemy);
+        function spawnInitialEnemies() {
+            for (let i = 0; i < maxEnemies; i++) {
+                spawnNewEnemy();
             }
+        }
+        
+        function spawnNewEnemy() {
+            const enemy = createEnemyBot();
+            const spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+            enemy.position.copy(spawnPoint);
+            scene.add(enemy);
+            enemies.push(enemy);
         }
         
         function onKeyDown(event) {
             switch (event.code) {
                 case 'KeyW': moveForward = true; break;
-                case 'KeyA': moveLeft = true; break;
                 case 'KeyS': moveBackward = true; break;
+                case 'KeyA': moveLeft = true; break;
                 case 'KeyD': moveRight = true; break;
+                case 'KeyQ': turnLeft = true; break;
+                case 'KeyE': turnRight = true; break;
+                case 'KeyL': onFire(); break;
                 case 'Space':
                     if (canJump) velocity.y = 10;
                     canJump = false;
@@ -255,9 +305,11 @@
         function onKeyUp(event) {
             switch (event.code) {
                 case 'KeyW': moveForward = false; break;
-                case 'KeyA': moveLeft = false; break;
                 case 'KeyS': moveBackward = false; break;
+                case 'KeyA': moveLeft = false; break;
                 case 'KeyD': moveRight = false; break;
+                case 'KeyQ': turnLeft = false; break;
+                case 'KeyE': turnRight = false; break;
             }
         }
         
@@ -282,8 +334,6 @@
         
         function onFire() {
             if (isReloading || currentAmmo <= 0) {
-                // Sadece mermisi yoksa ses çıkar, UI'da göster.
-                // onReload çağrısı yok, kullanıcı kendisi 'R' tuşu veya butona basmalı.
                 return;
             }
 
@@ -414,6 +464,14 @@
                 direction.z = moveJoystickPos.y;
                 direction.x = moveJoystickPos.x;
             } else {
+                // Klavyeden kamera kontrolü
+                if (turnLeft) {
+                    camera.rotation.y += turnSpeed;
+                }
+                if (turnRight) {
+                    camera.rotation.y -= turnSpeed;
+                }
+                
                 direction.z = Number(moveForward) - Number(moveBackward);
                 direction.x = Number(moveRight) - Number(moveLeft);
             }
@@ -444,6 +502,10 @@
                 canJump = true;
             }
             
+            if (enemies.length < maxEnemies) {
+                spawnNewEnemy();
+            }
+            
             updateEnemyBots();
             updateBullets();
             
@@ -452,10 +514,21 @@
 
         function updateEnemyBots() {
             enemies.forEach(enemy => {
-                // Basit bir bot AI'ı: Oyuncuya doğru dön ve ateş et
                 const lookDirection = new THREE.Vector3().subVectors(camera.position, enemy.position);
-                enemy.lookAt(camera.position);
+                enemy.lookAt(new THREE.Vector3(camera.position.x, enemy.position.y, camera.position.z));
                 
+                if (Date.now() - enemy.newTargetTime > 5000 || enemy.position.distanceTo(enemy.targetPosition) < 1) {
+                    enemy.targetPosition.set(
+                        (Math.random() - 0.5) * mapSize * 0.9,
+                        enemy.position.y,
+                        (Math.random() - 0.5) * mapSize * 0.9
+                    );
+                    enemy.newTargetTime = Date.now();
+                }
+
+                const moveDirection = new THREE.Vector3().subVectors(enemy.targetPosition, enemy.position).normalize();
+                enemy.position.add(moveDirection.multiplyScalar(enemy.movementSpeed));
+
                 if (Date.now() - enemy.lastFireTime > enemy.fireRate) {
                     fireEnemyBullet(enemy);
                     enemy.lastFireTime = Date.now();
@@ -477,7 +550,6 @@
         }
         
         function updateBullets() {
-            // Player bullets
             for(let i = playerBullets.length - 1; i >= 0; i--) {
                 const bullet = playerBullets[i];
                 bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
@@ -489,24 +561,25 @@
                 }
 
                 const bulletBox = new THREE.Box3().setFromObject(bullet);
+                let hitEnemy = false;
                 for(let j = enemies.length - 1; j >= 0; j--) {
                     const enemy = enemies[j];
                     const enemyBox = new THREE.Box3().setFromObject(enemy);
                     if (bulletBox.intersectsBox(enemyBox)) {
-                        enemy.health -= 25; // 4 mermide ölsün
+                        enemy.health -= 25;
                         if (enemy.health <= 0) {
                             scene.remove(enemy);
                             enemies.splice(j, 1);
                         }
-
                         scene.remove(bullet);
                         playerBullets.splice(i, 1);
+                        hitEnemy = true;
                         break;
                     }
                 }
+                if (hitEnemy) continue;
             }
 
-            // Enemy bullets
             for(let i = enemyBullets.length - 1; i >= 0; i--) {
                 const bullet = enemyBullets[i];
                 bullet.position.add(bullet.velocity.clone().multiplyScalar(0.016));
@@ -524,7 +597,6 @@
                     playerHealthElement.innerText = playerHealth;
                     if (playerHealth <= 0) {
                         showStatusMessage("OYUN BİTTİ! Yeniden oynamak için sayfayı yenileyin.", 'error');
-                        // Oyunu durdurmak için gerekli kodlar
                         return;
                     }
                     scene.remove(bullet);
